@@ -2,8 +2,8 @@
  * @file logging.c
  * @brief The implementation of the logging library.
  * @author Thomas REMY
- * @version 1.0.0
- * @date 03-14-2024
+ * @version 1.0.1
+ * @date 03-19-2024
  */
 
 #include <stdio.h>
@@ -16,9 +16,9 @@
 #include "exits.h"
 #include "logging.priv.h"
 
-extern Logger *logger;
+extern logger_t *logger;
 
-char* getLevelName(LogLevel level) {
+char* get_level_name(log_level_e level) {
     switch (level) {
         case TRACE:
             return "TRACE";
@@ -35,7 +35,7 @@ char* getLevelName(LogLevel level) {
     }
 }
 
-char* getLevelColor(LogLevel level) {
+char* get_level_color(log_level_e level) {
     switch (level) {
         case TRACE:
             return BLU;
@@ -52,81 +52,81 @@ char* getLevelColor(LogLevel level) {
     }
 }
 
-void initLogger(LoggerConfig config) {
-    logger = malloc(sizeof(Logger));
+void init_logger(logger_config_t config) {
+    logger = malloc(sizeof(logger_t));
     logger->config = config;
-    logger->trace = logTrace;
-    logger->debug = logDebug;
-    logger->info = logInfo;
-    logger->warn = logWarn;
-    logger->error = logError;
-    logger->fatal = logFatal;
+    logger->trace = log_trace;
+    logger->debug = log_debug;
+    logger->info = log_info;
+    logger->warn = log_warn;
+    logger->error = log_error;
+    logger->fatal = log_fatal;
 }
 
-Logger* getLogger() {
+logger_t* get_logger() {
     if (logger != NULL)
         return logger;
     else
         return NULL;
 }
 
-void myLog(LogLevel level, char *msg) {
+void my_log(log_level_e level, char *msg) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
 
-    if (!logger->config.coloredStdout) {
-        char *logData = malloc(logger->config.lineMaxLength * sizeof(char));
-        sprintf(logData, "%d-%d-%d %d:%d:%d [%s] %s\n",
+    if (!logger->config.colored_stdout) {
+        char *log_data = malloc(logger->config.line_max_length * sizeof(char));
+        sprintf(log_data, "%d-%d-%d %d:%d:%d [%s] %s\n",
                 tm.tm_mday,
                 tm.tm_mon,
                 tm.tm_year + 1900,
                 tm.tm_hour,
                 tm.tm_min,
                 tm.tm_sec,
-                getLevelName(level),
+                get_level_name(level),
                 msg);
 
-        if (logger->config.logToStdout && (level >= logger->config.stdoutMinLevel))
-            fputs(logData, stdout);
+        if (logger->config.log_to_stdout && (level >= logger->config.stdout_min_level))
+            fputs(log_data, stdout);
 
-        if (logger->config.logToFile && (level >= logger->config.fileMinLevel)) {
+        if (logger->config.log_to_file && (level >= logger->config.file_min_level)) {
             FILE *fptr;
-            fptr = fopen(logger->config.filePath, "a");
+            fptr = fopen(logger->config.file_path, "a");
 
             if (fptr == NULL) {
                 perror("An error occurred when trying to open a file");
                 exit(ERR_FOPEN);
             }
 
-            fputs(logData, fptr);
+            fputs(log_data, fptr);
             fclose(fptr);
         }
-        free(logData);
+        free(log_data);
     } else {
-        if (logger->config.logToStdout && (level >= logger->config.stdoutMinLevel)) {
+        if (logger->config.log_to_stdout && (level >= logger->config.stdout_min_level)) {
             printf("%d-%d-%d %d:%d:%d [%s%s%s] %s\n",
-                    tm.tm_mday,
-                    tm.tm_mon,
+                   tm.tm_mday,
+                   tm.tm_mon,
                     tm.tm_year + 1900,
-                    tm.tm_hour,
-                    tm.tm_min,
-                    tm.tm_sec,
-                    getLevelColor(level),
-                    getLevelName(level),
-                    RESET,
-                    msg);
+                   tm.tm_hour,
+                   tm.tm_min,
+                   tm.tm_sec,
+                   get_level_color(level),
+                   get_level_name(level),
+                   RESET,
+                   msg);
         }
 
-        if (logger->config.logToFile && (level >= logger->config.fileMinLevel)) {
+        if (logger->config.log_to_file && (level >= logger->config.file_min_level)) {
             FILE *fptr;
-            fptr = fopen(logger->config.filePath, "a");
+            fptr = fopen(logger->config.file_path, "a");
 
             if (fptr == NULL) {
                 perror("An error occurred when trying to open a file");
                 exit(ERR_FOPEN);
             }
 
-            char *logData = malloc(logger->config.lineMaxLength * sizeof(char));
+            char *logData = malloc(logger->config.line_max_length * sizeof(char));
             sprintf(logData, "%d-%d-%d %d:%d:%d [%s] %s\n",
                     tm.tm_mday,
                     tm.tm_mon,
@@ -134,7 +134,7 @@ void myLog(LogLevel level, char *msg) {
                     tm.tm_hour,
                     tm.tm_min,
                     tm.tm_sec,
-                    getLevelName(level),
+                    get_level_name(level),
                     msg);
 
             fputs(logData, fptr);
@@ -144,26 +144,26 @@ void myLog(LogLevel level, char *msg) {
     }
 }
 
-void logTrace(char *msg) {
-    myLog(TRACE, msg);
+void log_trace(char *msg) {
+    my_log(TRACE, msg);
 }
 
-void logDebug(char *msg) {
-    myLog(DEBUG, msg);
+void log_debug(char *msg) {
+    my_log(DEBUG, msg);
 }
 
-void logInfo(char *msg) {
-    myLog(INFO, msg);
+void log_info(char *msg) {
+    my_log(INFO, msg);
 }
 
-void logWarn(char *msg) {
-    myLog(WARN, msg);
+void log_warn(char *msg) {
+    my_log(WARN, msg);
 }
 
-void logError(char *msg) {
-    myLog(ERROR, msg);
+void log_error(char *msg) {
+    my_log(ERROR, msg);
 }
 
-void logFatal(char *msg) {
-    myLog(FATAL, msg);
+void log_fatal(char *msg) {
+    my_log(FATAL, msg);
 }

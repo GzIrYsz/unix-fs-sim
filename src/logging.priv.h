@@ -2,8 +2,8 @@
  * @file logging.priv.h
  * @brief This file contains the private declarations used for the logging library.
  * @author Thomas REMY
- * @version 1.0.0
- * @date 03-14-2024
+ * @version 1.0.1
+ * @date 03-19-2024
  */
 
 #pragma once
@@ -15,7 +15,7 @@
  * @param level The logging level.
  * @return The string representation of the given logging level.
  */
-char* getLevelName(LogLevel level);
+char* get_level_name(log_level_e level);
 
 /**
  * @brief Returns a color corresponding to a given logging level.
@@ -30,7 +30,7 @@ char* getLevelName(LogLevel level);
  * - ERROR -> RED
  * - FATAL -> WHITE (on a RED background)
  */
-char* getLevelColor(LogLevel level);
+char* get_level_color(log_level_e level);
 
 /**
  * @brief Logs a message at a given level.
@@ -39,46 +39,46 @@ char* getLevelColor(LogLevel level);
  *
  * This function logs to the standard output and/or to a file depending on the configuration.
  */
-void myLog(LogLevel level, char *msg);
+void my_log(log_level_e level, char *msg);
 
 /**
  * @brief Logs a message on the trace level.
  * @param msg The message to log.
- * @see myLog
+ * @see my_log
  */
-void logTrace(char *msg);
+void log_trace(char *msg);
 
 /**
  * @brief Logs a message on the debug level.
  * @param msg The message to log.
- * @see myLog
+ * @see my_log
  */
-void logDebug(char *msg);
+void log_debug(char *msg);
 
 /**
  * @brief Logs a message on the info level.
  * @param msg The message to log.
- * @see myLog
+ * @see my_log
  */
-void logInfo(char *msg);
+void log_info(char *msg);
 
 /**
  * @brief Logs a message on the warn level.
  * @param msg The message to log.
- * @see myLog
+ * @see my_log
  */
-void logWarn(char *msg);
+void log_warn(char *msg);
 
 /**
  * @brief Logs a message on the error level.
  * @param msg The message to log.
- * @see myLog
+ * @see my_log
  */
-void logError(char *msg);
+void log_error(char *msg);
 
 /**
  * @brief Logs a message on the fatal level.
  * @param msg The message to log.
- * @see myLog
+ * @see my_log
  */
-void logFatal(char *msg);
+void log_fatal(char *msg);
