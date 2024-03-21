@@ -18,6 +18,48 @@ typedef struct {
 } file_t;
 
 /**
+ * @struct inode_t ufs.h
+ * @brief This struct represents an inode stored in the fs.
+ */
+typedef struct {
+    int memorySizeData;
+    int lastModification;
+    int lastAccess;
+    Data* bloc1;
+    Data* bloc2;
+    Data* bloc3;
+    Data* bloc4;
+    Data* bloc5;
+    Data* bloc6;
+    Data* bloc7;
+    Data* bloc8;
+}Inode;
+
+/**
+ * @struct inode_t ufs.h
+ * @brief This struct represents an data stored in the fs.
+ */
+ typedef struct{
+     int* data;
+     int position;
+     int sizeData;
+ }Data;
+
+/**
+ * @struct inode_t ufs.h
+ * @brief This struct represents an SuperBlock stored in the fs.
+ */
+ typedef struct{
+     int size;
+     int numberBloc;
+     int numberBlocFree;
+     int numberInode;
+     int numberInodeFree;
+     int size_tableInode;
+     int size_tableData;
+ }SuperBloc;
+
+/**
  * @brief Formats the named partition as a new ufs partition with 4Ko blocks.
  * @param partition_name The name of the partition to format.
  * @return 0 if the format went well, -1 if an error occurs
