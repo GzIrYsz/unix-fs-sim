@@ -18,7 +18,7 @@
 typedef void (*log_action_t)(char *msg);
 
 /**
- * @enum log_level_e
+ * @enum log_level_t
  * @brief This enum is about the different levels of logging.
  *
  * The 6 levels are (from high to low):
@@ -36,7 +36,7 @@ typedef enum {
     WARN,
     ERROR,
     FATAL
-} log_level_e;
+} log_level_t;
 
 /**
  * @struct logger_config_t logging.h
@@ -52,10 +52,10 @@ typedef enum {
 typedef struct {
     size_t line_max_length;
     bool log_to_stdout;
-    log_level_e stdout_min_level;
+    log_level_t stdout_min_level;
     bool colored_stdout;
     bool log_to_file;
-    log_level_e file_min_level;
+    log_level_t file_min_level;
     char file_path[PATH_MAX];
 } logger_config_t;
 
