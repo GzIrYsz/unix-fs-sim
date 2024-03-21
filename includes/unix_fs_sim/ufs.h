@@ -1,5 +1,5 @@
 /**
-* @file ufs.h
+ * @file ufs.h
  * @brief The public API of the UNIX File System Simulation library.
  * @author Thomas REMY
  * @author Pierre FRANCK-PAPUCHON
@@ -8,6 +8,8 @@
 */
 
 #pragma once
+
+#include <stddef.h>
 
 /**
  * @struct file_t ufs.h
@@ -18,46 +20,46 @@ typedef struct {
 } file_t;
 
 /**
+ * @struct data_t ufs.h
+ * @brief This struct represents a data stored in the fs.
+ */
+typedef struct{
+    int *data;
+    int position;
+    int size_data;
+} data_t;
+
+/**
  * @struct inode_t ufs.h
  * @brief This struct represents an inode stored in the fs.
  */
 typedef struct {
-    int memorySizeData;
-    int lastModification;
-    int lastAccess;
-    Data* bloc1;
-    Data* bloc2;
-    Data* bloc3;
-    Data* bloc4;
-    Data* bloc5;
-    Data* bloc6;
-    Data* bloc7;
-    Data* bloc8;
-}Inode;
+    int memory_size_data;
+    int last_modification;
+    int last_access;
+    data_t *bloc1;
+    data_t *bloc2;
+    data_t *bloc3;
+    data_t *bloc4;
+    data_t *bloc5;
+    data_t *bloc6;
+    data_t *bloc7;
+    data_t *bloc8;
+} inode_t;
 
 /**
- * @struct inode_t ufs.h
- * @brief This struct represents an data stored in the fs.
- */
- typedef struct{
-     int* data;
-     int position;
-     int sizeData;
- }Data;
-
-/**
- * @struct inode_t ufs.h
- * @brief This struct represents an SuperBlock stored in the fs.
+ * @struct super_bloc_t ufs.h
+ * @brief This struct represents a SuperBlock stored in the fs.
  */
  typedef struct{
      int size;
-     int numberBloc;
-     int numberBlocFree;
-     int numberInode;
-     int numberInodeFree;
-     int size_tableInode;
-     int size_tableData;
- }SuperBloc;
+     int number_bloc;
+     int number_bloc_free;
+     int number_inode;
+     int number_inode_free;
+     size_t size_table_node;
+     size_t size_table_data;
+ } super_bloc_t;
 
 /**
  * @brief Formats the named partition as a new ufs partition with 4Ko blocks.
