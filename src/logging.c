@@ -18,7 +18,7 @@
 
 extern logger_t *logger;
 
-char* get_level_name(log_level_e level) {
+char* get_level_name(log_level_t level) {
     switch (level) {
         case TRACE:
             return "TRACE";
@@ -35,7 +35,7 @@ char* get_level_name(log_level_e level) {
     }
 }
 
-char* get_level_color(log_level_e level) {
+char* get_level_color(log_level_t level) {
     switch (level) {
         case TRACE:
             return BLU;
@@ -70,7 +70,7 @@ logger_t* get_logger() {
         return NULL;
 }
 
-void my_log(log_level_e level, char *msg) {
+void my_log(log_level_t level, char *msg) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
 
