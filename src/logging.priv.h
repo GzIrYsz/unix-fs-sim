@@ -15,7 +15,7 @@
  * @param level The logging level.
  * @return The string representation of the given logging level.
  */
-char* get_level_name(log_level_e level);
+char* get_level_name(log_level_t level);
 
 /**
  * @brief Returns a color corresponding to a given logging level.
@@ -30,7 +30,7 @@ char* get_level_name(log_level_e level);
  * - ERROR -> RED
  * - FATAL -> WHITE (on a RED background)
  */
-char* get_level_color(log_level_e level);
+char* get_level_color(log_level_t level);
 
 /**
  * @brief Logs a message at a given level.
@@ -39,7 +39,7 @@ char* get_level_color(log_level_e level);
  *
  * This function logs to the standard output and/or to a file depending on the configuration.
  */
-void my_log(log_level_e level, char *msg);
+void my_log(log_level_t level, char *msg);
 
 /**
  * @brief Logs a message on the trace level.
