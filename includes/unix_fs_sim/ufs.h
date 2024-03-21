@@ -10,6 +10,17 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
+
+typedef enum {
+    KB, MB, GB
+} size_unit_t;
+
+typedef enum {
+    SMALL = 1024,
+    MEDIUM = 2048,
+    LARGE = 4096
+} block_size_t;
 
 /**
  * @struct file_t ufs.h
@@ -100,3 +111,20 @@ int my_read(file_t *f, void *buffer, int nb_bytes);
  * @param base The base.
  */
 void my_seek(file_t *f, int offset, int base);
+
+/**
+ * @brief Create a new partition.
+ * @param path The path where the partition should be created (absolute or relative).
+ * @param size The size of the partion
+ * @return 0 if the partition was created, // TODO Finir la doc
+ */
+int mkpart(char *path, size_t size, size_unit_t unit);
+
+/**
+ * @brief Create a file system.
+ * @param path The path of the partition where to create the file system.
+ * @param block_size The size of the blocks (1024, 2048 or 4096 bytes).
+ * @param nb_inodes The ratio of inodes to the data blocks.
+ * @return
+ */
+int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes);
