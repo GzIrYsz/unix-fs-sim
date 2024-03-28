@@ -12,6 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define MAGIC_NUMBER 0x4F56A901
+
 typedef enum {
     KB, MB, GB
 } size_unit_t;
@@ -43,6 +45,10 @@ typedef struct{
 /**
  * @struct inode_t ufs.h
  * @brief This struct represents an inode stored in the fs.
+ * @var memory_size_data
+ * @var last_modification
+ * @var last_access
+ * @var
  */
 typedef struct {
     int memory_size_data;
@@ -61,15 +67,24 @@ typedef struct {
 /**
  * @struct super_bloc_t ufs.h
  * @brief This struct represents a SuperBlock stored in the fs.
+ * @var magic_number The serial number of the file system, used to determine if the file is a partition.
+ * @var block_size The size of the blocks.
+ * @var nb_blocks The number of blocks of the partition
+ * @var nb_data_blocks The number of data blocks
+ * @var nb_data_blocks_free The number of free data blocks
+ * @var nb_inodes The number of inodes
+ * @var nb_inodes_free The number of free inodes
+ * @var nb_inode_blocks The number of inode blocks
  */
  typedef struct{
-     int size;
-     int number_bloc;
-     int number_bloc_free;
-     int number_inode;
-     int number_inode_free;
-     size_t size_table_node;
-     size_t size_table_data;
+     uint32_t magic_number;
+     uint32_t block_size;
+     uint32_t nb_blocks;
+     uint32_t nb_data_blocks;
+     uint32_t nb_data_blocks_free;
+     uint32_t nb_inodes;
+     uint32_t nb_inodes_free;
+     uint32_t nb_inode_blocks;
  } super_bloc_t;
 
 /**
