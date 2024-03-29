@@ -12,7 +12,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/**
+ * @def MAGIC_NUMBER The magic number is the serial number of the filesystem. It must me present at the beginning of every partition.
+ */
 #define MAGIC_NUMBER 0x4F56A901
+
+/**
+ * @def NB_DATA_BLOCKS_INODE The number of direct data blocks in an inode.
+ */
+#define NB_DATA_BLOCKS_INODE 12
 
 typedef enum {
     KB, MB, GB
@@ -54,14 +62,7 @@ typedef struct {
     int memory_size_data;
     int last_modification;
     int last_access;
-    data_t *bloc1;
-    data_t *bloc2;
-    data_t *bloc3;
-    data_t *bloc4;
-    data_t *bloc5;
-    data_t *bloc6;
-    data_t *bloc7;
-    data_t *bloc8;
+    data_t *data_blocks[NB_DATA_BLOCKS_INODE];
 } inode_t;
 
 /**
