@@ -19,7 +19,7 @@
 
 extern logger_t *logger;
 
-int create_block(partition_t p, unsigned int i) {
+int create_block(partition_t p, uint32_t i) {
     if (i > p.super_bloc.nb_blocks) {
         logger->error("You are trying to create a block beyond the partition.");
         return -1;
@@ -28,7 +28,7 @@ int create_block(partition_t p, unsigned int i) {
     return 0;
 }
 
-int read_block(partition_t p, void *buf, unsigned int i) {
+int read_block(partition_t p, void *buf, uint32_t i) {
     if (i > p.super_bloc.nb_blocks) {
         logger->error("You are trying to read a block beyond the partition.");
         return -1;
@@ -46,7 +46,7 @@ int read_block(partition_t p, void *buf, unsigned int i) {
     return 0;
 }
 
-int update_block(partition_t p, const void *buf, unsigned int i) {
+int update_block(partition_t p, const void *buf, uint32_t i) {
     if (i > p.super_bloc.nb_blocks) {
         logger->error("You are trying to update a block beyond the partition.");
         return -1;
@@ -64,7 +64,7 @@ int update_block(partition_t p, const void *buf, unsigned int i) {
     return 0;
 }
 
-int delete_block(partition_t p, unsigned int i) {
+int delete_block(partition_t p, uint32_t i) {
     if (i > p.super_bloc.nb_blocks) {
         logger->error("You are trying to delete a block beyond the partition.");
         return -1;

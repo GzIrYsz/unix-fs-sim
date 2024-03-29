@@ -18,7 +18,7 @@
  * @param i The index of the block you want to create.
  * @return 0 if everything went well, -1 otherwise.
  */
-int create_block(partition_t p, unsigned int i);
+int create_block(partition_t p, uint32_t i);
 
 /**
  * @brief Reads the data located at the specified block.
@@ -27,7 +27,7 @@ int create_block(partition_t p, unsigned int i);
  * @param i The index of the block to read.
  * @return 0 if everything went well, -1 otherwise.
  */
-int read_block(partition_t p, void *buf, unsigned int i);
+int read_block(partition_t p, void *buf, uint32_t i);
 
 /**
  * @brief Writes new data on the bloc located at the specified index.
@@ -36,7 +36,7 @@ int read_block(partition_t p, void *buf, unsigned int i);
  * @param i The index of the block to update.
  * @return 0 if everything went well, -1 otherwise.
  */
-int update_block(partition_t p, const void *buf, unsigned int i);
+int update_block(partition_t p, const void *buf, uint32_t i);
 
 /**
  * @brief Deletes the bloc located at the specified index.
@@ -44,4 +44,4 @@ int update_block(partition_t p, const void *buf, unsigned int i);
  * @param i The index of the block to delete.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_block(partition_t p, unsigned int i);
+int delete_block(partition_t p, uint32_t i);
