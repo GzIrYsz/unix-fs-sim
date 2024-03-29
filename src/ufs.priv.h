@@ -8,6 +8,15 @@
 
 #pragma once
 
+#include "unix_fs_sim/ufs.h"
+
+typedef struct {
+    int fd;
+    super_bloc_t super_bloc;
+    uint32_t *block_bitmap;
+    uint32_t *inode_bitmap;
+} partition_t;
+
 int write_block();
 int write_super_block();
 int write_
