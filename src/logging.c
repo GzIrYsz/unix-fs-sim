@@ -107,7 +107,7 @@ void my_log(log_level_t level, char *msg) {
             printf("%d-%d-%d %d:%d:%d [%s%s%s] %s\n",
                    tm.tm_mday,
                    tm.tm_mon,
-                    tm.tm_year + 1900,
+                   tm.tm_year + 1900,
                    tm.tm_hour,
                    tm.tm_min,
                    tm.tm_sec,
