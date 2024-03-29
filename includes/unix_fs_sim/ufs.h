@@ -59,9 +59,9 @@ typedef struct{
  * @var
  */
 typedef struct {
-    int memory_size_data;
-    int last_modification;
-    int last_access;
+    uint32_t memory_size_data;
+    uint32_t last_modification;
+    uint32_t last_access;
     data_t *data_blocks[NB_DATA_BLOCKS_INODE];
 } inode_t;
 
