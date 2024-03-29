@@ -11,7 +11,7 @@
 
 #include "unix_fs_sim/ufs.h"
 
-#include "ufs.priv.h"
+#include "../../ufs.priv.h"
 
 /**
  * @brief Creates a block at the specified location.
@@ -19,7 +19,7 @@
  * @param i The index of the block you want to create.
  * @return 0 if everything went well, -1 otherwise.
  */
-int create_block(partition_stat_t p, unsigned int i);
+int create_block(partition_t p, unsigned int i);
 
 /**
  * @brief Reads the data located at the specified block.
@@ -28,16 +28,16 @@ int create_block(partition_stat_t p, unsigned int i);
  * @param i The index of the block to read.
  * @return 0 if everything went well, -1 otherwise.
  */
-int read_block(partition_stat_t p, void *buf, unsigned int i);
+int read_block(partition_t p, void *buf, unsigned int i);
 
 /**
  * @brief Writes new data on the bloc located at the specified index.
  * @param p The partition where to write the data.
- * @param buf The buffer where the data is stored (data will not be modified).
+ * @param buf The buffer where the data is stored (should be block_size wide).
  * @param i The index of the block to update.
  * @return 0 if everything went well, -1 otherwise.
  */
-int update_block(partition_stat_t p, const void *buf, unsigned int i);
+int update_block(partition_t p, const void *buf, unsigned int i);
 
 /**
  * @brief Deletes the bloc located at the specified index.
@@ -45,4 +45,4 @@ int update_block(partition_stat_t p, const void *buf, unsigned int i);
  * @param i The index of the block to delete.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_block(partition_stat_t p, unsigned int i);
+int delete_block(partition_t p, unsigned int i);
