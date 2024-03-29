@@ -10,6 +10,8 @@
 
 #include "unix_fs_sim/ufs.h"
 
+#define MAX_OPENED_FILES 64
+
 /**
  * @struct opened_file_t ufs.priv.h
  * @brief Represents an opened file.
@@ -26,7 +28,17 @@ typedef struct {
     super_bloc_t super_bloc;
     uint32_t *block_bitmap;
     uint32_t *inode_bitmap;
+    opened_file_t opened_files[MAX_OPENED_FILES];
+    uint16_t nb_opened_files;
 } partition_t;
+
+/**
+ * @brief Initialize a partition_t variable.
+ * @param fd The file descriptor of the opened partition.
+ * @param super_bloc The super block of the opened partition.
+ * @return A partition struct representing the partition.
+ */
+partition_t init_partition(int fd, super_bloc_t super_bloc);
 
 int write_block();
 int write_super_block();

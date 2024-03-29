@@ -14,7 +14,20 @@
 #include "logging/logging.h"
 #include "unix_fs_sim/ufs.h"
 
+#include "ufs.priv.h"
+#include "models/low_level/block.h"
+
 extern logger_t *logger;
+
+partition_t init_partition(int fd, super_bloc_t super_bloc) {
+    partition_t p;
+
+    p.fd = fd;
+    p.super_bloc = super_bloc;
+    p.nb_opened_files = 0;
+    
+    return p;
+}
 
 int mkpart(char *path, size_t size, size_unit_t unit) {
     if (access(path, F_OK) == 0) {
