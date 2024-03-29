@@ -7,12 +7,8 @@
  * @date 03-28-2024
  */
 
-#include <fcntl.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <unistd.h>
 
-#include "../../exits.h"
 #include "logging/logging.h"
 #include "data_bitmap.h"
 
@@ -66,11 +62,14 @@ int update_databitmap(partition_t p, unsigned int i){
 
     if (data_bitemap[i] == 0){
         data_bitemap[i] = 1;
+        p.super_bloc.nb_data_free--;
         logger->trace("This databloc is now define as used");
         return 0;
     }
     data_bitemap[i] = 0;
+    p.super_bloc.nb_data_free++;
     logger->trace("This databloc is now define as unused");
+    p.data_bitmap = data_bitemap;
     return 0;
 }
 
