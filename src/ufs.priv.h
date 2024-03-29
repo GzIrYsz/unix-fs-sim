@@ -43,9 +43,3 @@ typedef struct {
  * @return A partition struct representing the partition.
  */
 partition_t init_partition(int fd, super_bloc_t super_bloc);
-
-int write_block();
-int write_super_block();
-int write_
-int write_inode_table();
-int write_inode();

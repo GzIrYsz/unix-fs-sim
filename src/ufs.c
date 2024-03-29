@@ -25,7 +25,7 @@ partition_t init_partition(int fd, super_bloc_t super_bloc) {
     p.fd = fd;
     p.super_bloc = super_bloc;
     p.nb_opened_files = 0;
-    
+
     return p;
 }
 
