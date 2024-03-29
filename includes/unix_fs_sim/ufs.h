@@ -71,8 +71,8 @@ typedef struct {
  * @var magic_number The serial number of the file system, used to determine if the file is a partition.
  * @var block_size The size of the blocks.
  * @var nb_blocks The number of blocks of the partition
- * @var nb_data_blocks The number of data blocks
- * @var nb_data_blocks_free The number of free data blocks
+ * @var nb_data The number of data blocks
+ * @var nb_data_free The number of free data blocks
  * @var nb_inodes The number of inodes
  * @var nb_inodes_free The number of free inodes
  * @var nb_inode_blocks The number of inode blocks
@@ -81,8 +81,8 @@ typedef struct {
      uint32_t magic_number;
      uint32_t block_size;
      uint32_t nb_blocks;
-     uint32_t nb_data_blocks;
-     uint32_t nb_data_blocks_free;
+     uint32_t nb_data;
+     uint32_t nb_data_free;
      uint32_t nb_inodes;
      uint32_t nb_inodes_free;
      uint32_t nb_inode_blocks;
