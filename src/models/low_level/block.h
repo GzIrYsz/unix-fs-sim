@@ -2,7 +2,6 @@
  * @file block.h
  * @brief This file contains the CRUD operations available on a block.
  * @author Thomas REMY
- * @author Pierre FRANCK-PAPUCHON
  * @version 1.0.0
  * @date 03-28-2024
  */
