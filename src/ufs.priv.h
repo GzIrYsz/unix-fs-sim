@@ -10,6 +10,17 @@
 
 #include "unix_fs_sim/ufs.h"
 
+/**
+ * @struct opened_file_t ufs.priv.h
+ * @brief Represents an opened file.
+ * @var inode The inode of the file.
+ * @var offset The position of the read/write head.
+ */
+typedef struct {
+    uint32_t inode;
+    uint32_t offset;
+} opened_file_t;
+
 typedef struct {
     int fd;
     super_bloc_t super_bloc;
