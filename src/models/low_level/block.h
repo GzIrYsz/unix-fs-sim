@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "unix_fs_sim/ufs.h"
 
 #include "../../ufs.priv.h"
