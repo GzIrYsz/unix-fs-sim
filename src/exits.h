@@ -14,3 +14,8 @@
  * @def ERR_FOPEN The exit code when an error occurred when trying to open a file.
  */
 #define ERR_FOPEN 8
+
+/**
+ * @def ERR_MALLOC The exit code when an error occurred when trying to allocate memory.
+ */
+#define ERR_MALLOC 9
