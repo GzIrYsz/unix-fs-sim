@@ -33,10 +33,21 @@ int read_block(partition_t p, void *buf, uint32_t i);
  * @brief Writes new data on the bloc located at the specified index.
  * @param p The partition where to write the data.
  * @param buf The buffer where the data is stored (should be block_size wide).
+ * @param data_length The length of the data.
+ * @param i The index of the block to update.
+ * @param offset The were to write the data in the specific bloc.
+ * @return 0 if everything went well, -1 otherwise.
+ */
+int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint32_t offset);
+
+/**
+ * @brief Writes new data on the bloc located at the specified index.
+ * @param p The partition where to write the data.
+ * @param buf The buffer where the data is stored (should be block_size wide).
  * @param i The index of the block to update.
  * @return 0 if everything went well, -1 otherwise.
  */
-int update_block(partition_t p, const void *buf, uint32_t i);
+int write_bloc(partition_t p, const void *buf, uint32_t i);
 
 /**
  * @brief Deletes the bloc located at the specified index.

@@ -46,9 +46,27 @@ int read_block(partition_t p, void *buf, uint32_t i) {
     return 0;
 }
 
-int update_block(partition_t p, const void *buf, uint32_t i) {
+int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint32_t offset) {
     if (i > p.super_bloc.nb_blocks) {
         logger->error("You are trying to update a block beyond the partition.");
+        return -1;
+    }
+
+    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) + offset - 1, SEEK_SET) == -1) {
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
+    if (write(p.fd, buf, data_length) == -1) {
+        logger->error("An error occurred when trying to update the block.");
+        return -1;
+    }
+    logger->trace("Block updated.");
+    return 0;
+}
+
+int write_bloc(partition_t p, const void *buf, uint32_t i) {
+    if (i > p.super_bloc.nb_blocks) {
+        logger->error("You are trying to write a block beyond the partition.");
         return -1;
     }
 
@@ -57,10 +75,10 @@ int update_block(partition_t p, const void *buf, uint32_t i) {
         return -1;
     }
     if (write(p.fd, buf, p.super_bloc.block_size) == -1) {
-        logger->error("An error occurred when trying to update the file.");
+        logger->error("An error occurred when trying to write the block.");
         return -1;
     }
-    logger->trace("Block updated.");
+    logger->trace("Block written.");
     return 0;
 }
 
