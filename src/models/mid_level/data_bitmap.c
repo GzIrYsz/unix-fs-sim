@@ -1,19 +1,19 @@
 /**
- * @file block_bitmap.c
- * @brief
- * @author Thomas REMY
+ * @file data_bitmap.c
+ * @brief This file contains the implementation of the CRUD operations available on a data bitmap.
  * @author Pierre FRANCK-PAPUCHON
- * @version 0.1.0
- * @date 03-28-2024
+ * @version 1.0.0
+ * @date 03-29-2024
  */
 
 #include <stdlib.h>
 
 #include "logging/logging.h"
+
 #include "data_bitmap.h"
 
 
-extern logger_t* logger;
+extern logger_t *logger;
 
 int create_databitmap(partition_t p){
     uint32_t* data_bitmap;
