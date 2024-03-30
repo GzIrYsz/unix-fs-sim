@@ -43,6 +43,6 @@ int delete_inodebitmap(partition_t p);
 /**
  * @brief Finds the next free inode and returns its index.
  * @param p The partition.
- * @return The index of the next free inode or 0 if an error occurs or there is no more free inode.
+ * @return The index of the next free inode or nb_inodes + 1 if an error occurs or there is no more free inode.
  */
 uint32_t next_free_inode(partition_t p);

@@ -85,7 +85,7 @@ int delete_inodebitmap(partition_t p) {
 uint32_t next_free_inode(partition_t p) {
     if (p.super_bloc.nb_inodes_free <= 0) {
         logger->warn("No more free inode.");
-        return 0;
+        return p.super_bloc.nb_inodes + 1;
     }
 
     uint32_t i = 0;
