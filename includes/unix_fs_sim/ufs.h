@@ -89,6 +89,11 @@ typedef struct {
      uint32_t nb_inode_blocks;
  } super_bloc_t;
 
+ typedef struct {
+     char *name;
+     uint32_t inode;
+ } dir_entry_t;
+
 /**
  * @brief Formats the named partition as a new ufs partition with 4Ko blocks.
  * @param partition_name The name of the partition to format.
