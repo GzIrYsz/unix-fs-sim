@@ -45,7 +45,7 @@ typedef struct {
  * @brief This struct represents a data stored in the fs.
  */
 typedef struct{
-    int *data;
+    uint8_t *data;
     int position;
     int size_data;
 } data_t;
