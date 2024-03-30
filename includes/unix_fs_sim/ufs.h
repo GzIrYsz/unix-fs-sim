@@ -46,7 +46,7 @@ typedef struct {
  */
 typedef struct{
     uint8_t *data;
-    int position;
+    uint32_t position;
     int size_data;
 } data_t;
 
@@ -62,6 +62,7 @@ typedef struct {
     uint32_t memory_size_data;
     uint32_t last_modification;
     uint32_t last_access;
+    uint32_t file_type;
     data_t *data_blocks[NB_DATA_BLOCKS_INODE];
 } inode_t;
 
