@@ -32,8 +32,8 @@ typedef struct {
 typedef struct {
     int fd;
     super_bloc_t super_bloc;
-    uint32_t *data_bitmap;
-    uint32_t *inode_bitmap;
+    uint8_t *data_bitmap;
+    uint8_t *inode_bitmap;
     opened_file_t opened_files[MAX_OPENED_FILES];
     uint16_t nb_opened_files;
 } partition_t;
