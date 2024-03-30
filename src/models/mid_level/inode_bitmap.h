@@ -13,7 +13,7 @@
 #include "../../ufs.priv.h"
 
 /**
- * @brief Creates a new inode bitmap.
+ * @brief Creates a new inode bitmap on disk.
  * @param p The partition where to create de bitmap.
  * @return 0 if everything went well, -1 otherwise.
  */
@@ -43,6 +43,6 @@ int delete_inodebitmap(partition_t p);
 /**
  * @brief Finds the next free inode and returns its index.
  * @param p The partition.
- * @return The index of the next free inode or -1 if an error occurs.
+ * @return The index of the next free inode or -1 if an error occurs or there is no more free inode.
  */
 uint32_t next_free_inode(partition_t p);
