@@ -20,11 +20,14 @@
 extern logger_t* logger;
 
 off_t get_offset_inode(partition_t p, uint32_t i){
-    return (int) (ceil(p.super_bloc.nb_data/p.super_bloc.block_size)+ceil(p.super_bloc.nb_inodes/p.super_bloc.block_size)+1)*p.super_bloc.block_size + i * sizeof(inode);
+    uint32_t nb_data = p.super_bloc.nb_data;
+    uint32_t block_size = p.super_bloc.block_size;
+    uint32_t nb_inodes = p.super_bloc.nb_inodes;
+    return (int) (ceil(nb_data/block_size)+ceil(nb_inodes/block_size)+1)*block_size + i * sizeof(inode_t);
 }
 
 int create_inode(partition_t p, uint32_t i){
-    if (i > p.super_bloc.nb_blocks){
+    if (i > p.super_bloc.nb_blocks) {
         logger->error("You are trying to create an inode beyond the memory for all inode.");
         return -1;
     }
