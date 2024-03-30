@@ -7,7 +7,9 @@
  */
 
 #include <stdlib.h>
-
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
 #include "logging/logging.h"
 
 #include "data_bitmap.h"
@@ -16,74 +18,89 @@
 extern logger_t *logger;
 
 int create_databitmap(partition_t p){
-    uint32_t* data_bitmap;
-    uint32_t nb_data = p.super_bloc.nb_data;
-    data_bitmap = (uint32_t *) malloc(nb_data * sizeof(uint32_t));
+    off_t bitmap_pos = (int) ceil(p.super_bloc.block_size);
 
-    if (data_bitmap == NULL){
-        logger->error("You got on error on your alloction of your blockbitmap.");
+    if (lseek(p.fd, bitmap_pos, SEEK_SET)){
+        logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
-    for (int i = 0; i < nb_data; i++) {
-        data_bitmap[i] = 0;
+    uint8_t* bitmap = (uint8_t*) malloc(p.super_bloc.nb_data * sizeof (uint8_t));
+    if (bitmap == NULL){
+        logger->error("An error occured when trying to allocate your bitmap");
+        return -1;
     }
 
-    p.data_bitmap = data_bitmap;
-    logger->trace("Blockbitmap created");
+    if (write(p.fd, bitmap, p.super_bloc.nb_data) == -1){
+        logger->error("An error occurred when trying to create the data bitmap.");
+        free(bitmap);
+        return -1;
+    }
 
+    free(bitmap);
+    logger->info("Data bitmap created");
     return 0;
 }
 
-int accessibility_databitmap(partition_t p, unsigned int i){
-    uint32_t nb_data = p.super_bloc.nb_data;
-    uint32_t* data_bitemap = p.data_bitmap;
-    if (i > nb_data){
-        logger->error("You are trying to read block beyond the partition.");
+int read_databitmap(partition_t p){
+    off_t bitmap_pos = (int) ceil(p.super_bloc.block_size);
+    if (lseek(p.fd, bitmap_pos, SEEK_SET)){
+        logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
-    if(data_bitemap[i] != 0){
-        logger->trace("This data is already use");
-        return 1;
+    if (read(p.fd, p.data_bitmap, p.super_bloc. nb_data) == -1) {
+        logger->error("An error occurred when trying to read the data bitmap.");
+        return -1;
     }
-    logger->trace("You can use this data");
+
+    logger->trace("Data bitmap read");
     return 0;
 }
 
-int update_databitmap(partition_t p, unsigned int i){
-    uint32_t nb_data = p.super_bloc.nb_data;
-    uint32_t* data_bitemap = p.data_bitmap;
-
-    if (i > nb_data){
-        logger->error("You are trying to create a block beyond the partition.");
+int update_databitmap(partition_t p){
+    off_t bitmap_pos = (int) ceil(p.super_bloc.block_size);
+    if (lseek(p.fd, bitmap_pos, SEEK_SET)){
+        logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
-    if (data_bitemap[i] == 0){
-        data_bitemap[i] = 1;
-        p.super_bloc.nb_data_free--;
-        logger->trace("This databloc is now define as used");
-        return 0;
+    if (write(p.fd, p.data_bitmap, p.super_bloc. nb_data) == -1) {
+        logger->error("An error occurred when trying to update the data bitmap.");
+        return -1;
     }
-    data_bitemap[i] = 0;
-    p.super_bloc.nb_data_free++;
-    logger->trace("This databloc is now define as unused");
-    p.data_bitmap = data_bitemap;
+
+    logger->trace("Data bitmap update");
     return 0;
+
 }
 
-int delete_databitmap(partition_t p, unsigned int i){
-    uint32_t nb_data = p.super_bloc.nb_data;
-    uint32_t* data_bitemap = p.data_bitmap;
-
-    if (i > nb_data){
-        logger->error("You are trying to create a block beyond the partition.");
+int delete_databitmap(partition_t p){
+    off_t bitmap_pos = (int) ceil(p.super_bloc.block_size);
+    if (lseek(p.fd, bitmap_pos, SEEK_SET)){
+        logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
-    p.data_bitmap = NULL;
+    uint8_t* bitmap = (uint8_t*) malloc(p.super_bloc.nb_data * sizeof(uint8_t ));
+
+    if (write(p.fd, bitmap, p.super_bloc.nb_data) == -1) {
+        logger->error("An error occurred when trying to delete the inode bitmap.");
+        free(bitmap);
+        return -1;
+    }
     free(p.data_bitmap);
-    logger->trace("Your databitmap got deleted");
+    logger->info("Data bitmap deleted");
     return 0;
+}
+
+uint32_t next_free_data(partition_t p){
+    if (p.super_bloc.nb_data_free <= 0){
+        logger->warn("No more free data");
+        return -1;
+    }
+
+    uint32_t i = 0;
+    while (p.data_bitmap[i]) i++;
+    return i;
 }

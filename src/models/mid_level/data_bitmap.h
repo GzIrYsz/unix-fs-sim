@@ -14,32 +14,36 @@
 #include "../../ufs.priv.h"
 
 /**
- * @brief Creates a bitmap for data
- * @param p The partition where to create your databitmap
- * @return 0 if your databitmap got allocated, -1 if you got an error on allocation
+ * @brief Creates a new data bitmap on disk.
+ * @param p The partition where to create your databitmap.
+ * @return 0 if everything went well, -1 otherwise.
  */
 int create_databitmap(partition_t p);
 
 /**
- * @brief Look the accessibility of your data
- * @param p The partition where you get your databitmap
- * @param i The data_block you want to look
- * @return 0 if the data is unused, or 1 if he used, -1 otherwise
+ * @brief Reads the data bitmap and store it in memory.
+ * @param p The partition.
+ * @return 0 if everything went well, -1 otherwise.
  */
-int accessibility_databitmap(partition_t p, unsigned int i);
+int read_databitmap(partition_t p);
 
 /**
- * @brief Update your the accessibility of your data in the bitmap
- * @param p The partition where you get your databitmap
- * @param i The data_block you want to look
- * @return 0 if he could update, -1 otherwise
+ * @brief Writes the data bitmap on the disk.
+ * @param p The partition.
+ * @return 0 if everything went well, -1 otherwise.
  */
-int update_databitmap(partition_t p, unsigned int i);
+int update_databitmap(partition_t p);
 
 /**
- * @brief Delete your databitmap
- * @param p The partition where you get your databitmap
- * @param i The data_block you want to delete
- * @return 0 if you deleted it, -1 otherwise
+ * @brief Delete the inode bitmap stored on disk.
+ * @param p The partition.
+ * @return 0 if everything went well, -1 otherwise.
  */
-int delete_databitmap(partition_t p, unsigned int i);
+int delete_databitmap(partition_t p);
+
+/**
+ * @brief Finds the next free data and returns its index.
+ * @param p The partition.
+ * @return The index of the next free data or -1 if an error occurs or there is no more free data.
+ */
+uint32_t next_free_data(partition_t p);
