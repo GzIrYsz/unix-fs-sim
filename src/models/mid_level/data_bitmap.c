@@ -25,7 +25,7 @@ int create_databitmap(partition_t p){
         return -1;
     }
 
-    uint8_t* bitmap = (uint8_t*) malloc(p.super_bloc.nb_data * sizeof (uint8_t));
+    uint8_t* bitmap = (uint8_t*) malloc(p.super_bloc.nb_data * sizeof(uint8_t));
     if (bitmap == NULL){
         logger->error("An error occured when trying to allocate your bitmap");
         return -1;
@@ -97,7 +97,7 @@ int delete_databitmap(partition_t p){
 uint32_t next_free_data(partition_t p){
     if (p.super_bloc.nb_data_free <= 0){
         logger->warn("No more free data");
-        return -1;
+        return 0;
     }
 
     uint32_t i = 0;
