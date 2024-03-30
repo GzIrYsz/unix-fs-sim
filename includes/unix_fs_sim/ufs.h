@@ -63,7 +63,7 @@ typedef struct {
     uint32_t last_modification;
     uint32_t last_access;
     uint32_t file_type;
-    data_t *data_blocks[NB_DATA_BLOCKS_INODE];
+    uint32_t data_blocks[NB_DATA_BLOCKS_INODE];
 } inode_t;
 
 /**
