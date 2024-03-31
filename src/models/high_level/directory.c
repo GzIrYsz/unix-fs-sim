@@ -8,3 +8,79 @@
  */
 
 #include "directory.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <unistd.h>
+#include <string.h>
+
+#include "logging/logging.h"
+#include "../low_level/block.h"
+
+extern logger_t* logger;
+
+int get_offset(partition_t p){
+    double nb_data = (double) p.super_bloc.nb_data;
+    double block_size = (double) p.super_bloc.block_size;
+    double nb_inodes = (double) p.super_bloc.nb_inodes;
+    return (off_t) (ceil(nb_data/block_size)+ ceil(nb_inodes/block_size)+(p.super_bloc.nb_blocks/10)+1)*block_size;
+}
+
+int create_directory(partition_t p){
+    logger->trace("Directory created");
+    return 0;
+}
+
+int read_directory(partition_t p){
+    int directory_offset = get_offset(p);
+
+    if(lseek(p.fd, directory_offset, SEEK_SET) == -1){
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
+
+    dir_entry_t* directory = p.directory;
+    for (int i = 0; i < p.super_bloc.nb_inodes-p.super_bloc.nb_inodes_free; i++) {
+        if (read(p.fd, directory->name+i, 60) == -1){
+            logger->error("An error occurred when trying to read the directory name");
+            return -1;
+        }
+        if (read(p.fd, &(directory->inode)+i, sizeof(uint32_t)) == -1){
+            logger->error("An error occurred when trying to read the directory inode");
+            return -1;
+        }
+    }
+
+    logger->trace("Directory read");
+    return 0;
+}
+
+int update_directory(partition_t p){
+    int directory_offset = get_offset(p);
+    if(lseek(p.fd, directory_offset, SEEK_SET) == -1){
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
+
+    dir_entry_t* directory = p.directory;
+    for (int i = 0; i < p.super_bloc.nb_inodes; i++) {
+        if(write(p.fd, (directory->name)+i, 60) == -1){
+            logger->error("An error occurred when trying to update the name in your directory");
+            return -1;
+        }
+        if (write(p.fd, (&directory->inode) +i, 4) == -1){
+            logger->error("An error occured when trying to update the inode in your directory");
+            return -1;
+        }
+    }
+
+    logger->trace("Directory updated");
+    return 0;
+}
+
+int delete_directory(partition_t p){
+    logger->trace("Directory deleted");
+    return 0;
+}
+
+int insertion_entry(dir_entry_t* dir, )
