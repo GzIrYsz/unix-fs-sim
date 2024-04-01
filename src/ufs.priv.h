@@ -36,6 +36,7 @@ typedef struct {
     uint8_t *inode_bitmap;
     opened_file_t opened_files[MAX_OPENED_FILES];
     uint16_t nb_opened_files;
+    dir_entry_t* directory;
 } partition_t;
 
 /**
