@@ -19,7 +19,7 @@
 #include "inode.h"
 extern logger_t* logger;
 
-off_t get_offset_inode(partition_t p, uint32_t i){
+off_t get_inode_offset(partition_t p, uint32_t i){
     double nb_data = (double) p.super_bloc.nb_data;
     double block_size = (double) p.super_bloc.block_size;
     double nb_inodes = (double) p.super_bloc.nb_inodes;
@@ -54,7 +54,7 @@ int read_inode(partition_t p, inode_t* inode, uint32_t i){
         return -1;
     }
 
-    off_t inode_pos = get_offset_inode(p, i);
+    off_t inode_pos = get_inode_offset(p, i);
     if (lseek(p.fd, inode_pos, SEEK_SET) == -1){
         logger->error("An error occurred when trying to move the head.");
         return -1;
@@ -94,7 +94,7 @@ int update_inode(partition_t p, inode_t inode, uint32_t i){
         return -1;
     }
 
-    off_t inode_pos = get_offset_inode(p, i);
+    off_t inode_pos = get_inode_offset(p, i);
 
     if(write(p.fd, &inode.memory_size_data, 4) == -1){
         logger->error("An error occurred when trying to update the size of inode data");
