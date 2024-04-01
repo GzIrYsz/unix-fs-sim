@@ -7,7 +7,9 @@
 * @date 03-28-2024
 */
 
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/file.h>
 
@@ -15,7 +17,13 @@
 #include "unix_fs_sim/ufs.h"
 
 #include "ufs.priv.h"
+#include "models/high_level/directory.h"
+#include "models/high_level/file.h"
 #include "models/low_level/block.h"
+#include "models/mid_level/data.h"
+#include "models/mid_level/data_bitmap.h"
+#include "models/mid_level/inode.h"
+#include "models/mid_level/inode_bitmap.h"
 
 extern logger_t *logger;
 
@@ -48,7 +56,7 @@ int mkpart(char *path, size_t size, size_unit_t unit) {
     }
 
     int fd;
-    if ((fd = open(path, O_WRONLY | O_CREAT | O_EXCL)) == -1) {
+    if ((fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0600)) == -1) {
         logger->error("An error occurred when trying to open the file.");
         return -1;
     }
@@ -75,4 +83,57 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
         logger->error(log_buf);
         return -1;
     }
+
+    int fd;
+    if ((fd = open(path, O_RDWR)) == -1) {
+        logger->error("An error occurred when trying to open the partition.");
+        return -1;
+    }
+
+    super_bloc_t super_bloc = {
+            .magic_number = MAGIC_NUMBER,
+            .block_size = block_size,
+            .nb_blocks = (uint32_t) floor((double)lseek(fd, 0, SEEK_END) / (double) block_size)
+    };
+    super_bloc.nb_inode_blocks = (uint32_t) ceil((double) super_bloc.nb_blocks * 0.10); // TODO : Implémenter le formatage avec un nombre d'inodes dynamique
+    super_bloc.nb_inodes = super_bloc.nb_inode_blocks * sizeof(inode_t);
+    super_bloc.nb_inodes_free = super_bloc.nb_inodes;
+    uint32_t nb_data_total = super_bloc.nb_blocks - 1 - (uint32_t) ceil((double) super_bloc.nb_inodes / (double) super_bloc.block_size) - super_bloc.nb_inode_blocks;
+    super_bloc.nb_data = nb_data_total - (uint32_t) ceil((double) nb_data_total / (double) super_bloc.block_size);
+    super_bloc.nb_data_free = super_bloc.nb_data;
+
+    partition_t p = {
+            .fd = fd,
+            .super_bloc = super_bloc
+    };
+
+    if (lseek(fd, 0, SEEK_SET) == -1) {
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
+
+    if (update_bloc(p, &super_bloc, sizeof(super_bloc_t), 0, 0) == -1) {
+        logger->error("An error occurred when trying to write the superblock to the partition.");
+        return -1;
+    }
+
+    if (create_databitmap(p) == -1) {
+        logger->error("An error occurred when trying to create the data bitmap.");
+        return -1;
+    }
+
+    if (create_inodebitmap(p) == -1) {
+        logger->error("An error occurred when trying to create the inode bitmap.");
+        return -1;
+    }
+    if (close(fd) == -1) {
+        logger->error("An error occurred when trying to close the partition.");
+        return -1;
+    }
+    logger->info("Filesystem created.");
+    return 0;
+}
+
+int my_format(char *partition_name) {
+    return mkfs(partition_name, LARGE, 10);
 }
