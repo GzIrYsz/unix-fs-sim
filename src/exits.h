@@ -19,3 +19,8 @@
  * @def ERR_MALLOC The exit code when an error occurred when trying to allocate memory.
  */
 #define ERR_MALLOC 9
+
+/**
+ * @def ERR_FORK The exit code when an error occurred during a fork.
+ */
+#define ERR_FORK 10
