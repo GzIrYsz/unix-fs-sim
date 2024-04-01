@@ -38,6 +38,7 @@ int create_inode(partition_t p, uint32_t i){
     }
 
     p.inode_bitmap[i] = 1;
+    p.super_bloc.nb_inodes_free--;
     logger->trace("Inode created");
     return 0;
 }
@@ -130,6 +131,7 @@ int delete_inode(partition_t p, uint32_t i){
     }
 
     p.inode_bitmap[i] = 0;
+    p.super_bloc.nb_inodes_free++;
     logger->trace("Inode deleted");
     return 0;
 }
