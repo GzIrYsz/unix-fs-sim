@@ -41,11 +41,11 @@ int read_directory(partition_t p){
 
     dir_entry_t* directory = p.directory;
     for (int i = 0; i < p.super_bloc.nb_inodes-p.super_bloc.nb_inodes_free; i++) {
-        if (read(p.fd, directory->name+i, 60) == -1){
+        if (read(p.fd, (directory+i)->name, 60) == -1){
             logger->error("An error occurred when trying to read the directory name");
             return -1;
         }
-        if (read(p.fd, &(directory->inode)+i, sizeof(uint32_t)) == -1){
+        if (read(p.fd, &(directory+i)->inode, sizeof(uint32_t)) == -1){
             logger->error("An error occurred when trying to read the directory inode");
             return -1;
         }
@@ -64,11 +64,11 @@ int update_directory(partition_t p){
 
     dir_entry_t* directory = p.directory;
     for (int i = 0; i < p.super_bloc.nb_inodes; i++) {
-        if(write(p.fd, (directory->name)+i, 60) == -1){
+        if(write(p.fd, (directory+i)->name, 60) == -1){
             logger->error("An error occurred when trying to update the name in your directory");
             return -1;
         }
-        if (write(p.fd, (&directory->inode) +i, 4) == -1){
+        if (write(p.fd, &(directory+i)->inode, 4) == -1){
             logger->error("An error occured when trying to update the inode in your directory");
             return -1;
         }
@@ -83,4 +83,62 @@ int delete_directory(partition_t p){
     return 0;
 }
 
-int insertion_entry(dir_entry_t* dir, )
+int insertion_entry(partition_t p, dir_entry_t dir){
+    if(dir.inode > p.super_bloc.nb_inodes){
+        logger->error("You are trying to associate a non-existant inode");
+        return -1;
+    }
+
+    int cmp_letter = 0;
+    int index_dir = 0;
+
+    while (index_dir < p.super_bloc.nb_inodes - p.super_bloc.nb_inodes_free && (int) dir.name[cmp_letter] <= (int) (p.directory+index_dir)->name[cmp_letter] && cmp_letter < 60){
+        if ((int) dir.name[cmp_letter] == (int) (p.directory->name+index_dir)[cmp_letter]){
+            cmp_letter++;
+        }else{
+            index_dir++;
+        }
+    }
+
+    dir_entry_t tmp;
+
+    for (int j = index_dir; j < p.super_bloc.nb_inodes - p.super_bloc.nb_inodes_free +1; j++) {
+        tmp.name = (p.directory+j)->name;
+        tmp.inode = (p.directory+j)->inode;
+        (p.directory+j)->name = dir.name;
+        (p.directory+j)->inode = dir.inode;
+        dir.name = tmp.name;
+        dir.inode = tmp.inode;
+    }
+
+    logger->trace("New directory entry added");
+    return 0;
+}
+
+int delete_entry(partition_t p, dir_entry_t dir){
+    if(dir.inode > p.super_bloc.nb_inodes){
+        logger->error("You're trying to delete a non-existante inode");
+        return -1;
+    }
+
+    int i = 0;
+
+    while(dir.inode != p.directory[i].inode && i <= p.super_bloc.nb_inodes-p.super_bloc.nb_inodes_free){
+        i++;
+    }
+
+    if(i >= p.super_bloc.nb_inodes-p.super_bloc.nb_inodes_free){
+        logger->error("You're trying to delete a not alloued inode");
+        return -1;
+    }
+
+    dir_entry_t tmp;
+
+    for (int j = 0; j < p.super_bloc.nb_inodes-p.super_bloc.nb_inodes_free-1; j++) {
+        p.directory[j].inode = p.directory[j+1].inode;
+        p.directory[j].name = p.directory[j+1].name;
+    }
+
+    logger->trace("Entry deleted");
+    return 0;
+}
