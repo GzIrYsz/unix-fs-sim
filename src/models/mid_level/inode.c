@@ -28,7 +28,7 @@ off_t get_offset_inode(partition_t p, uint32_t i){
 }
 
 int create_inode(partition_t p, uint32_t i){
-    if (i > p.super_bloc.nb_blocks) {
+    if (i > p.super_bloc.nb_inodes) {
         logger->error("You are trying to create an inode beyond the memory for all inode.");
         return -1;
     }
@@ -43,6 +43,11 @@ int create_inode(partition_t p, uint32_t i){
 }
 
 int read_inode(partition_t p, inode_t* inode, uint32_t i){
+    if (i > p.super_bloc.nb_inodes) {
+        logger->error("You are trying to read an inode beyond the accepted range.");
+        return -1;
+    }
+
     if (p.inode_bitmap[i] == 0){
         logger->warn("Your inode is not open !");
         return -1;
@@ -78,6 +83,11 @@ int read_inode(partition_t p, inode_t* inode, uint32_t i){
 }
 
 int update_inode(partition_t p, inode_t inode, uint32_t i){
+    if (i > p.super_bloc.nb_inodes) {
+        logger->error("You are trying to update an inode beyond the accepted range.");
+        return -1;
+    }
+
     if (p.inode_bitmap[i] == 0){
         logger->warn("Your inode is not open");
         return -1;
@@ -109,7 +119,7 @@ int update_inode(partition_t p, inode_t inode, uint32_t i){
 }
 
 int delete_inode(partition_t p, uint32_t i){
-    if (i > p.super_bloc.nb_blocks){
+    if (i > p.super_bloc.nb_inodes){
         logger->error("You are trying to create an inode beyond the memory for all inode.");
         return -1;
     }
