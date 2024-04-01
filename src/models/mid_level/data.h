@@ -8,9 +8,13 @@
 
 #pragma once
 
+#include <unistd.h>
+
 #include "unix_fs_sim/ufs.h"
 
 #include "../../ufs.priv.h"
+
+off_t get_data_offset(partition_t p, uint32_t i);
 
 /**
  * @brief Creates data at the specified location.

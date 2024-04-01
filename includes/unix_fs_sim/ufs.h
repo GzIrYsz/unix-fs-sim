@@ -22,6 +22,8 @@
  */
 #define NB_DATA_BLOCKS_INODE 12
 
+#define MAX_FILENAME 60
+
 typedef enum {
     KB, MB, GB
 } size_unit_t;
@@ -34,10 +36,14 @@ typedef enum {
 
 /**
  * @struct file_t ufs.h
- * @brief This struct represents a file stored in the fs.
+ * @brief Represents an opened file.
+ * @var inode The inode of the file.
+ * @var offset The position of the read/write head.
  */
 typedef struct {
-    int size;
+    char name[MAX_FILENAME];
+    uint32_t inode;
+    uint32_t offset;
 } file_t;
 
 /**
@@ -150,3 +156,10 @@ int mkpart(char *path, size_t size, size_unit_t unit);
  * @return
  */
 int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes);
+
+/**
+ * @brief Mount a filesystem so it can be used to read and create files.
+ * @param path The path of the partition where the filesystem is located.
+ * @return 0 if everything went well, -1 otherwise.
+ */
+int mount(char *path);

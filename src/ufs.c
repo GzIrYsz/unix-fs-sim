@@ -10,8 +10,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
 #include <sys/file.h>
+#include <unistd.h>
 
 #include "logging/logging.h"
 #include "unix_fs_sim/ufs.h"
@@ -26,6 +27,8 @@
 #include "models/mid_level/inode_bitmap.h"
 
 extern logger_t *logger;
+
+partition_t *p_mounted;
 
 partition_t init_partition(int fd, super_bloc_t super_bloc) {
     partition_t p;
@@ -136,4 +139,171 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
 
 int my_format(char *partition_name) {
     return mkfs(partition_name, LARGE, 10);
+}
+
+int mount(char *path) {
+    if (access(path, F_OK) != 0) {
+        char log_buf[1024];
+        sprintf(log_buf, "This partition does not exists: %s", path);
+        logger->error(log_buf);
+        return -1;
+    }
+
+    int fd;
+    if ((fd = open(path, O_RDWR)) == -1) {
+        logger->error("An error occurred when trying to open the partition.");
+        return -1;
+    }
+
+    super_bloc_t super_bloc;
+    if (lseek(fd, 0, SEEK_SET) == -1) {
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.magic_number, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the magic number.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.block_size, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the bloc size.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.nb_blocks, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the number of blocks.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.nb_data, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the number of data blocks.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.nb_data_free, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the number of free data blocks.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.nb_inodes, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the number of inodes.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.nb_inodes_free, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the number of free inodes.");
+        return -1;
+    }
+    if (read(fd, &super_bloc.nb_inode_blocks, sizeof(uint32_t)) == -1) {
+        logger->error("An error occurred when trying to read the number of inode blocks.");
+        return -1;
+    }
+
+    partition_t *p = (partition_t*) malloc(sizeof(partition_t));
+    p->fd = fd;
+    p->super_bloc = super_bloc;
+    p->nb_opened_files = 0;
+    read_databitmap(*p);
+    read_inodebitmap(*p);
+    read_directory(*p);
+
+    p_mounted = p;
+    logger->info("Partition mounted.");
+    return 0;
+}
+
+file_t* my_open(char *file_name) {
+    dir_entry_t *main_dir = p_mounted->directory;
+
+    int i = 0;
+    while (!strcmp(file_name, main_dir[i].name) && i < (p_mounted->super_bloc.nb_inodes - p_mounted->super_bloc.nb_inodes_free)) {
+        i++;
+    }
+
+    file_t *f = (file_t*) malloc(sizeof(file_t));
+    if (i < (p_mounted->super_bloc.nb_inodes - p_mounted->super_bloc.nb_inodes_free)) {
+        f->inode = main_dir[i].inode;
+    }
+
+    if ((f->inode = create_file(file_name, *p_mounted)) == -1) {
+        logger->error("An error occurred when trying to create the file.");
+        return NULL;
+    }
+
+    strcpy(f->name, file_name);
+    f->offset = 0;
+    p_mounted->opened_files[p_mounted->nb_opened_files++] = f;
+    logger->info("File opened.");
+    return f;
+}
+
+int my_write(file_t *f, void *buffer, int nb_bytes) {
+    inode_t i;
+    read_inode(*p_mounted, &i, f->inode);
+    uint32_t start_size = i.memory_size_data;
+    int write_pos = floor((double) f->offset / (double) p_mounted->super_bloc.block_size);
+    if (write_pos >= NB_DATA_BLOCKS_INODE) {
+        logger->error("Max size reached. Impossible to write here.");
+        return -1;
+    }
+
+    off_t write_offset = i.memory_size_data - (write_pos * p_mounted->super_bloc.block_size);
+    off_t block_offset = get_data_offset(*p_mounted, i.data_blocks[write_pos]);
+
+    if (update_bloc(*p_mounted, buffer, nb_bytes, block_offset, write_offset) == -1) {
+        logger->error("An error occurred when trying to write to the file.");
+        return i.memory_size_data - start_size;
+    }
+    i.memory_size_data += p_mounted->super_bloc.block_size - write_offset;
+    nb_bytes -= p_mounted->super_bloc.block_size - write_offset;
+    update_inode(*p_mounted, i, f->inode);
+
+    if (nb_bytes <= 0) {
+        return i.memory_size_data - start_size;
+    }
+
+    size_t nb_blocks_to_write = floor((double) nb_bytes / (double) p_mounted->super_bloc.block_size);
+    for (int j = 0; j < nb_blocks_to_write; ++j) {
+        uint32_t new_data_block;
+        if ((new_data_block = next_free_data(*p_mounted)) == -1) {
+            logger->error("An error occurred when trying to find a new free data block.");
+            return i.memory_size_data - start_size;
+        }
+        if (create_data(*p_mounted, new_data_block) == -1) {
+            logger->error("An error occurred when trying to create data.");
+        }
+        i.data_blocks[write_pos + j] = new_data_block;
+        update_inode(*p_mounted, i, f->inode);
+
+        if (j < nb_blocks_to_write - 1) {
+            if (update_data(*p_mounted, (uint8_t*) buffer, new_data_block) == -1) {
+                logger->error("An error occurred when trying to write data in a new block.");
+                return i.memory_size_data - start_size;
+            }
+            i.memory_size_data += p_mounted->super_bloc.block_size;
+            nb_bytes -= p_mounted->super_bloc.block_size;
+            update_inode(*p_mounted, i, f->inode);
+        } else {
+            if (update_bloc(*p_mounted, buffer, nb_bytes, new_data_block, 0) == -1) {
+                logger->error("An error occurred when trying to write data in a new block.");
+                return i.memory_size_data - start_size;
+            }
+            i.memory_size_data += p_mounted->super_bloc.block_size - nb_bytes;
+            nb_bytes -= nb_bytes;
+            update_inode(*p_mounted, i, f->inode);
+        }
+    }
+    logger->info("Data written.");
+    return i.memory_size_data - start_size;;
+}
+
+void my_seek(file_t *f, int offset, int base) {
+    inode_t i;
+    switch (base) {
+        case SEEK_SET:
+            f->offset = offset;
+            break;
+        case SEEK_CUR:
+            f->offset += offset;
+            break;
+        case SEEK_END:
+            read_inode(*p_mounted, &i, f->inode);
+            f->offset = i.memory_size_data - offset;
+        default:
+            logger->error("Base unrecognized.");
+    }
 }

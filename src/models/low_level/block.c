@@ -34,7 +34,7 @@ int read_block(partition_t p, void *buf, uint32_t i) {
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) - 1, SEEK_SET) == -1) {
+    if (lseek(p.fd, (off_t) i * p.super_bloc.block_size, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
@@ -52,10 +52,14 @@ int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) + offset - 1, SEEK_SET) == -1) {
+    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) + offset, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
+
+    data_length = data_length > (p.super_bloc.block_size - offset)
+            ? p.super_bloc.block_size - offset
+            : data_length;
     if (write(p.fd, buf, data_length) == -1) {
         logger->error("An error occurred when trying to update the block.");
         return -1;
@@ -70,7 +74,7 @@ int write_bloc(partition_t p, const void *buf, uint32_t i) {
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) - 1, SEEK_SET) == -1) {
+    if (lseek(p.fd, (off_t) i * p.super_bloc.block_size, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
@@ -88,7 +92,7 @@ int delete_block(partition_t p, uint32_t i) {
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) - 1, SEEK_SET) == -1) {
+    if (lseek(p.fd, (off_t) i * p.super_bloc.block_size, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }

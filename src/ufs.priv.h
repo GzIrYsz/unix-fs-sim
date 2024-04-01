@@ -13,28 +13,13 @@
 #include "unix_fs_sim/ufs.h"
 
 #define MAX_OPENED_FILES 64
-#define INODE_FREE 0
-#define INODE_USED 1
-#define DATA_FREE 0
-#define DATA_USED 1
-
-/**
- * @struct opened_file_t ufs.priv.h
- * @brief Represents an opened file.
- * @var inode The inode of the file.
- * @var offset The position of the read/write head.
- */
-typedef struct {
-    uint32_t inode;
-    uint32_t offset;
-} opened_file_t;
 
 typedef struct {
     int fd;
     super_bloc_t super_bloc;
     uint8_t *data_bitmap;
     uint8_t *inode_bitmap;
-    opened_file_t opened_files[MAX_OPENED_FILES];
+    file_t *opened_files[MAX_OPENED_FILES];
     uint16_t nb_opened_files;
     dir_entry_t* directory;
 } partition_t;
