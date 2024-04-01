@@ -15,9 +15,9 @@
  * @brief Creates an empty file in the partition.
  * @param name The name of the file (should be unique).
  * @param p The partition.
- * @return 0 if everything went well, -1 otherwise.
+ * @return The inode if everything went well, -1 otherwise.
  */
-int create_file(char *name, partition_t p);
+uint32_t create_file(char *name, partition_t p);
 
 int read_file(char *name, partition_t p); // ?
 
