@@ -100,6 +100,11 @@ int insertion_entry(partition_t p, dir_entry_t dir){
         }
     }
 
+    if( cmp_letter >= 60){
+        logger->error("You're trying to create directory entry with a name already use.");
+        return -1;
+    }
+
     dir_entry_t tmp;
 
     for (int j = index_dir; j < p.super_bloc.nb_inodes - p.super_bloc.nb_inodes_free +1; j++) {
