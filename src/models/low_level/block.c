@@ -19,8 +19,8 @@
 
 extern logger_t *logger;
 
-int create_block(partition_t p, uint32_t i) {
-    if (i > p.super_bloc.nb_blocks) {
+int create_block(partition_t *p, uint32_t i) {
+    if (i > p->super_bloc.nb_blocks) {
         logger->error("You are trying to create a block beyond the partition.");
         return -1;
     }
@@ -28,17 +28,17 @@ int create_block(partition_t p, uint32_t i) {
     return 0;
 }
 
-int read_block(partition_t p, void *buf, uint32_t i) {
-    if (i > p.super_bloc.nb_blocks) {
+int read_block(partition_t *p, void *buf, uint32_t i) {
+    if (i > p->super_bloc.nb_blocks) {
         logger->error("You are trying to read a block beyond the partition.");
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) i * p.super_bloc.block_size, SEEK_SET) == -1) {
+    if (lseek(p->fd, (off_t) i * p->super_bloc.block_size, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
-    if (read(p.fd, buf, p.super_bloc.block_size) == -1) {
+    if (read(p->fd, buf, p->super_bloc.block_size) == -1) {
         logger->error("An error occurred when trying to read the file.");
         return -1;
     }
@@ -46,21 +46,21 @@ int read_block(partition_t p, void *buf, uint32_t i) {
     return 0;
 }
 
-int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint32_t offset) {
-    if (i > p.super_bloc.nb_blocks) {
+int update_bloc(partition_t *p, void *buf, uint32_t data_length, uint32_t i, uint32_t offset) {
+    if (i > p->super_bloc.nb_blocks) {
         logger->error("You are trying to update a block beyond the partition.");
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) (i * p.super_bloc.block_size) + offset, SEEK_SET) == -1) {
+    if (lseek(p->fd, (off_t) (i * p->super_bloc.block_size) + offset, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
-    data_length = data_length > (p.super_bloc.block_size - offset)
-            ? p.super_bloc.block_size - offset
+    data_length = data_length > (p->super_bloc.block_size - offset)
+            ? p->super_bloc.block_size - offset
             : data_length;
-    if (write(p.fd, buf, data_length) == -1) {
+    if (write(p->fd, buf, data_length) == -1) {
         logger->error("An error occurred when trying to update the block.");
         return -1;
     }
@@ -68,17 +68,17 @@ int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint
     return 0;
 }
 
-int write_bloc(partition_t p, const void *buf, uint32_t i) {
-    if (i > p.super_bloc.nb_blocks) {
+int write_bloc(partition_t *p, const void *buf, uint32_t i) {
+    if (i > p->super_bloc.nb_blocks) {
         logger->error("You are trying to write a block beyond the partition.");
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) i * p.super_bloc.block_size, SEEK_SET) == -1) {
+    if (lseek(p->fd, (off_t) i * p->super_bloc.block_size, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
-    if (write(p.fd, buf, p.super_bloc.block_size) == -1) {
+    if (write(p->fd, buf, p->super_bloc.block_size) == -1) {
         logger->error("An error occurred when trying to write the block.");
         return -1;
     }
@@ -86,24 +86,24 @@ int write_bloc(partition_t p, const void *buf, uint32_t i) {
     return 0;
 }
 
-int delete_block(partition_t p, uint32_t i) {
-    if (i > p.super_bloc.nb_blocks) {
+int delete_block(partition_t *p, uint32_t i) {
+    if (i > p->super_bloc.nb_blocks) {
         logger->error("You are trying to delete a block beyond the partition.");
         return -1;
     }
 
-    if (lseek(p.fd, (off_t) i * p.super_bloc.block_size, SEEK_SET) == -1) {
+    if (lseek(p->fd, (off_t) i * p->super_bloc.block_size, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
     char *buf;
-    if ((buf = (char*) malloc(p.super_bloc.block_size * sizeof(char))) == NULL) {
+    if ((buf = (char*) malloc(p->super_bloc.block_size * sizeof(char))) == NULL) {
         logger->error("An error occurred when trying to allocate memory.");
         exit(ERR_MALLOC);
     }
-    memset(buf, 0, p.super_bloc.block_size);
-    if (write(p.fd, buf, p.super_bloc.block_size) == -1) {
+    memset(buf, 0, p->super_bloc.block_size);
+    if (write(p->fd, buf, p->super_bloc.block_size) == -1) {
         logger->error("An error occurred when trying to delete the block.");
         return -1;
     }

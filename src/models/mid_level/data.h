@@ -14,7 +14,7 @@
 
 #include "../../ufs.priv.h"
 
-off_t get_data_offset(partition_t p, uint32_t i);
+off_t get_data_offset(partition_t *p, uint32_t i);
 
 /**
  * @brief Creates data at the specified location.
@@ -22,7 +22,7 @@ off_t get_data_offset(partition_t p, uint32_t i);
  * @param i The index where you want to create the data.
  * @return 0 if everything went well, -1 otherwise.
  */
-int create_data(partition_t p, uint32_t i);
+int create_data(partition_t *p, uint32_t i);
 
 /**
  * @brief Reads data located at the specified index.
@@ -31,7 +31,7 @@ int create_data(partition_t p, uint32_t i);
  * @param i The index of the data.
  * @return 0 if everything went well, -1 otherwise.
  */
-int read_data(partition_t p, uint8_t *data, uint32_t i);
+int read_data(partition_t *p, uint8_t *data, uint32_t i);
 
 /**
  * @brief Writes or updates the data located at the specified index.
@@ -40,7 +40,7 @@ int read_data(partition_t p, uint8_t *data, uint32_t i);
  * @param i The index where to store the data.
  * @return 0 if everything went well, -1 otherwise.
  */
-int update_data(partition_t p, const uint8_t *data, uint32_t i);
+int update_data(partition_t *p, const uint8_t *data, uint32_t i);
 
 /**
  * @brief Deletes the data located at the specified index.
@@ -48,4 +48,4 @@ int update_data(partition_t p, const uint8_t *data, uint32_t i);
  * @param i The index of the data to delete.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_data(partition_t p, uint32_t i);
+int delete_data(partition_t *p, uint32_t i);

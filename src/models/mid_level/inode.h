@@ -18,7 +18,7 @@
  * @param i The index of the inode you want to create.
  * @return 0 if everything went well, -1 otherwise.
  */
-int create_inode(partition_t p, uint32_t i);
+int create_inode(partition_t *p, uint32_t i);
 
 /**
  * @brief Reads an inode located at the specified location.
@@ -27,7 +27,7 @@ int create_inode(partition_t p, uint32_t i);
  * @param i The index of inode to read.
  * @return 0 if everything went well, -1 otherwise.
  */
-int read_inode(partition_t p, inode_t *inode, uint32_t i);
+int read_inode(partition_t *p, inode_t *inode, uint32_t i);
 
 /**
  * @brief Writes or updates the inode located at the specified index.
@@ -36,7 +36,7 @@ int read_inode(partition_t p, inode_t *inode, uint32_t i);
  * @param i The index of the inode to update.
  * @return 0 if everything went well, -1 otherwise.
  */
-int update_inode(partition_t p, inode_t inode, uint32_t i);
+int update_inode(partition_t *p, inode_t inode, uint32_t i);
 
 /**
  * @brief Deletes the inode located at the specified index.
@@ -44,4 +44,4 @@ int update_inode(partition_t p, inode_t inode, uint32_t i);
  * @param i The index of the inode to delete.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_inode(partition_t p, uint32_t i);
+int delete_inode(partition_t *p, uint32_t i);

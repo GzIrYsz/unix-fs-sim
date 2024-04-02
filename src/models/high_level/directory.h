@@ -15,28 +15,28 @@
  * @param p The partition to use.
  * @return 0 if everything went well, -1 otherwise.
  */
-int create_directory(partition_t p);
+int create_directory(partition_t *p);
 
 /**
  * @brief Reads a directory.
  * @param p The partition to use.
  * @return 0 if everything went well, -1 otherwise.
  */
-int read_directory(partition_t p);
+int read_directory(partition_t *p);
 
 /**
  * @brief Update a directory.
  * @param p The partition to use.
  * @return 0 if everything went well, -1 otherwise
  */
-int update_directory(partition_t p);
+int update_directory(partition_t *p);
 
 /**
  * @brief Delete the directory.
  * @param p The partition to use.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_directory(partition_t p);
+int delete_directory(partition_t *p);
 
 /**
  * @briedf Insertion of a directory entry in the directory
@@ -44,7 +44,7 @@ int delete_directory(partition_t p);
  * @param dir the directory to insert.
  * @return 0 if everything went well, -1 otherwise.
  */
-int insertion_entry(partition_t p, dir_entry_t dir);
+int insertion_entry(partition_t *p, dir_entry_t dir);
 
 /**
  * @brief Delete a specific directory entry in the directory
@@ -52,4 +52,4 @@ int insertion_entry(partition_t p, dir_entry_t dir);
  * @param dir The directory to delete.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_entry(partition_t p, dir_entry_t dir);
+int delete_entry(partition_t *p, dir_entry_t dir);

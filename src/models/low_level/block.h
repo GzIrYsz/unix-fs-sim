@@ -20,7 +20,7 @@
  * @param i The index of the block you want to create.
  * @return 0 if everything went well, -1 otherwise.
  */
-int create_block(partition_t p, uint32_t i);
+int create_block(partition_t *p, uint32_t i);
 
 /**
  * @brief Reads the data located at the specified block.
@@ -29,7 +29,7 @@ int create_block(partition_t p, uint32_t i);
  * @param i The index of the block to read.
  * @return 0 if everything went well, -1 otherwise.
  */
-int read_block(partition_t p, void *buf, uint32_t i);
+int read_block(partition_t *p, void *buf, uint32_t i);
 
 /**
  * @brief Writes new data on the bloc located at the specified index.
@@ -40,7 +40,7 @@ int read_block(partition_t p, void *buf, uint32_t i);
  * @param offset The were to write the data in the specific bloc.
  * @return 0 if everything went well, -1 otherwise.
  */
-int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint32_t offset);
+int update_bloc(partition_t *p, void *buf, uint32_t data_length, uint32_t i, uint32_t offset);
 
 /**
  * @brief Writes new data on the bloc located at the specified index.
@@ -49,7 +49,7 @@ int update_bloc(partition_t p, void *buf, uint32_t data_length, uint32_t i, uint
  * @param i The index of the block to update.
  * @return 0 if everything went well, -1 otherwise.
  */
-int write_bloc(partition_t p, const void *buf, uint32_t i);
+int write_bloc(partition_t *p, const void *buf, uint32_t i);
 
 /**
  * @brief Deletes the bloc located at the specified index.
@@ -57,4 +57,4 @@ int write_bloc(partition_t p, const void *buf, uint32_t i);
  * @param i The index of the block to delete.
  * @return 0 if everything went well, -1 otherwise.
  */
-int delete_block(partition_t p, uint32_t i);
+int delete_block(partition_t *p, uint32_t i);

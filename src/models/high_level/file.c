@@ -8,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "logging/logging.h"
@@ -21,14 +22,14 @@
 
 extern logger_t *logger;
 
-uint32_t create_file(char *name, partition_t p) {
-    if (p.super_bloc.nb_inodes_free <= 0 || p.super_bloc.nb_data_free <= 0) {
+uint32_t create_file(char *name, partition_t *p) {
+    if (p->super_bloc.nb_inodes_free <= 0 || p->super_bloc.nb_data_free <= 0) {
         logger->warn("No more inode or data block free.");
         return -1;
     }
 
     uint32_t i;
-    if ((i = next_free_inode(p)) == (p.super_bloc.nb_inodes + 1)) {
+    if ((i = next_free_inode(p)) == (p->super_bloc.nb_inodes + 1)) {
         logger->error("An error occurred when trying to find a free inode.");
         return -1;
     }
@@ -56,7 +57,7 @@ uint32_t create_file(char *name, partition_t p) {
     }
 
     dir_entry_t dir_entry;
-    dir_entry.name = name;
+    strcpy(dir_entry.name, name);
     dir_entry.inode = i;
     if (insertion_entry(p, dir_entry) == -1) {
         logger->error("An error occurred when trying to create a directory entry for the file.");
