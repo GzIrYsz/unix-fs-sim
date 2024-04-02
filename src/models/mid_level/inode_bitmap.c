@@ -8,6 +8,8 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "logging/logging.h"
@@ -17,25 +19,25 @@
 extern logger_t *logger;
 
 int create_inodebitmap(partition_t *p) {
-    off_t bitmap_pos = (int) (ceil(p->super_bloc.nb_data / p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
+    off_t bitmap_pos = (int) (ceil((double) p->super_bloc.nb_data / (double) p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
     if (lseek(p->fd, bitmap_pos, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
 
-    uint8_t *bitmap = (uint8_t*) malloc(p->super_bloc.nb_inodes * sizeof(uint8_t));
-    if (write(p->fd, bitmap, p->super_bloc.nb_inodes) == -1) {
+    p->inode_bitmap = (uint8_t*) malloc(p->super_bloc.nb_inodes * sizeof(uint8_t));
+    memset(p->inode_bitmap, 0, p->super_bloc.nb_inodes);
+    if (write(p->fd, p->inode_bitmap, p->super_bloc.nb_inodes) == -1) {
         logger->error("An error occurred when trying to create the inode bitmap.");
-        free(bitmap);
         return -1;
     }
-    free(bitmap);
+
     logger->info("Inode bitmap created.");
     return 0;
 }
 
 int read_inodebitmap(partition_t *p) {
-    off_t bitmap_pos = (int) (ceil(p->super_bloc.nb_data / p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
+    off_t bitmap_pos = (int) (ceil((double) p->super_bloc.nb_data / (double) p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
     if (lseek(p->fd, bitmap_pos, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
@@ -50,7 +52,7 @@ int read_inodebitmap(partition_t *p) {
 }
 
 int update_inodebitmap(partition_t *p) {
-    off_t bitmap_pos = (int) (ceil(p->super_bloc.nb_data / p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
+    off_t bitmap_pos = (int) (ceil((double) p->super_bloc.nb_data / (double) p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
     if (lseek(p->fd, bitmap_pos, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
@@ -65,7 +67,7 @@ int update_inodebitmap(partition_t *p) {
 }
 
 int delete_inodebitmap(partition_t *p) {
-    off_t bitmap_pos = (int) (ceil(p->super_bloc.nb_data / p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
+    off_t bitmap_pos = (int) (ceil((double) p->super_bloc.nb_data / (double) p->super_bloc.block_size) + 1) * p->super_bloc.block_size;
     if (lseek(p->fd, bitmap_pos, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
         return -1;

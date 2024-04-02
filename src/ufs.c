@@ -132,7 +132,12 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
         }
     }
 
-    if (update_bloc(p, &super_bloc, sizeof(super_bloc_t), 0, 0) == -1) {
+    if (update_databitmap(p) == -1) {
+        logger->error("An error occurred when trying to update the data bitmap.");
+        return -1;
+    }
+
+    if (update_bloc(p, &p->super_bloc, sizeof(super_bloc_t), 0, 0) == -1) {
         logger->error("An error occurred when trying to write the superblock to the partition.");
         return -1;
     }
@@ -221,6 +226,9 @@ file_t* my_open(char *file_name) {
     dir_entry_t *main_dir = p_mounted->directory;
 
     int i = 0;
+    char buf[100];
+    sprintf(buf, "strcmp : %d", strcmp(file_name, main_dir[i].name));
+    logger->debug(buf);
     while (!strcmp(file_name, main_dir[i].name) && i < (p_mounted->super_bloc.nb_inodes - p_mounted->super_bloc.nb_inodes_free)) {
         i++;
     }
@@ -255,7 +263,7 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
     off_t write_offset = i.memory_size_data - (write_pos * p_mounted->super_bloc.block_size);
     off_t block_offset = get_data_offset(p_mounted, i.data_blocks[write_pos]);
 
-    if (update_bloc(p_mounted, buffer, nb_bytes, block_offset, write_offset) == -1) {
+    if (update_bloc(p_mounted, buffer, nb_bytes, block_offset / p_mounted->super_bloc.block_size, f->offset) == -1) {
         logger->error("An error occurred when trying to write to the file.");
         return i.memory_size_data - start_size;
     }
@@ -299,6 +307,7 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
         }
     }
     logger->info("Data written.");
+    f->offset = i.memory_size_data - start_size;
     return i.memory_size_data - start_size;;
 }
 

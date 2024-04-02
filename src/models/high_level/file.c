@@ -14,6 +14,7 @@
 #include "logging/logging.h"
 
 #include "../high_level/directory.h"
+#include "../mid_level/data.h"
 #include "../mid_level/inode.h"
 #include "../mid_level/data_bitmap.h"
 #include "../mid_level/inode_bitmap.h"
@@ -51,8 +52,19 @@ uint32_t create_file(char *name, partition_t *p) {
         return -1;
     }
 
+    if (create_data(p, inode.data_blocks[0]) == -1) {
+        logger->error("An error occurred when trying to create a new data block.");
+        return -1;
+    }
+
     if (update_inode(p, inode, i) == -1) {
         logger->error("An error occurred when trying to update an inode.");
+        return -1;
+    }
+
+    p->super_bloc.nb_inodes_free--;
+    if (update_bloc(p, &p->super_bloc, sizeof(super_bloc_t), 0, 0) == -1) {
+        logger->error("An error occurred when trying to update the superblock.");
         return -1;
     }
 

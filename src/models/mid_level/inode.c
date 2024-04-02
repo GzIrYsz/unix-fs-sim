@@ -72,8 +72,12 @@ int read_inode(partition_t *p, inode_t* inode, uint32_t i){
         logger->error("An error occurred when trying to read the inode last access");
         return -1;
     }
-    for (int j = 0; j < 8; j++) {
-        if(read(p->fd, inode->data_blocks+j, sizeof(uint32_t)) == -1){
+    if(read(p->fd, &inode->file_type, 4) == -1){
+        logger->error("An error occurred when trying to read the inode file type.");
+        return -1;
+    }
+    for (int j = 0; j < NB_DATA_BLOCKS_INODE; j++) {
+        if(read(p->fd, (inode->data_blocks + j), sizeof(uint32_t)) == -1){
             logger->error("An error occurred when trying to read one of your inode data block");
             return -1;
         }
@@ -95,6 +99,10 @@ int update_inode(partition_t *p, inode_t inode, uint32_t i){
     }
 
     off_t inode_pos = get_inode_offset(p, i);
+    if (lseek(p->fd, inode_pos, SEEK_SET) == -1) {
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
 
     if(write(p->fd, &inode.memory_size_data, 4) == -1){
         logger->error("An error occurred when trying to update the size of inode data");
@@ -108,8 +116,12 @@ int update_inode(partition_t *p, inode_t inode, uint32_t i){
         logger->error("An error occurred when trying to update the size of inode last access");
         return -1;
     }
-    for (int j = 0; j < 8; j++) {
-        if(write(p->fd, &inode.data_blocks+i, 4) == -1){
+    if(write(p->fd, &inode.file_type, 4) == -1){
+        logger->error("An error occurred when trying to update the size of inode file type.");
+        return -1;
+    }
+    for (int j = 0; j < NB_DATA_BLOCKS_INODE; j++) {
+        if(write(p->fd, inode.data_blocks + j, 4) == -1){
             logger->error("An error occurred when trying to read one of your inode data block");
             return -1;
         }

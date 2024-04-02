@@ -25,19 +25,18 @@ int create_databitmap(partition_t *p){
         return -1;
     }
 
-    uint8_t* bitmap = (uint8_t*) malloc(p->super_bloc.nb_data * sizeof(uint8_t));
-    if (bitmap == NULL){
-        logger->error("An error occured when trying to allocate your bitmap");
+    p->data_bitmap = (uint8_t*) malloc(p->super_bloc.nb_data * sizeof(uint8_t));
+    memset(p->data_bitmap, 0, p->super_bloc.nb_data);
+    if (p->data_bitmap == NULL){
+        logger->error("An error occurred when trying to allocate your bitmap");
         return -1;
     }
 
-    if (write(p->fd, bitmap, p->super_bloc.nb_data) == -1){
+    if (write(p->fd, p->data_bitmap, p->super_bloc.nb_data) == -1){
         logger->error("An error occurred when trying to create the data bitmap.");
-        free(bitmap);
         return -1;
     }
 
-    free(bitmap);
     logger->info("Data bitmap created");
     return 0;
 }
@@ -65,7 +64,7 @@ int update_databitmap(partition_t *p){
         return -1;
     }
 
-    if (write(p->fd, p->data_bitmap, p->super_bloc. nb_data) == -1) {
+    if (write(p->fd, p->data_bitmap, p->super_bloc.nb_data) == -1) {
         logger->error("An error occurred when trying to update the data bitmap.");
         return -1;
     }

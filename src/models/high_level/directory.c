@@ -19,11 +19,19 @@
 
 extern logger_t* logger;
 
-int get_offset(partition_t *p){
+/*int get_offset(partition_t *p){
     double nb_data = (double) p->super_bloc.nb_data;
     double block_size = (double) p->super_bloc.block_size;
     double nb_inodes = (double) p->super_bloc.nb_inodes;
+    return (off_t)
     return (off_t) (ceil(nb_data/block_size)+ ceil(nb_inodes/block_size)+(p->super_bloc.nb_blocks/10)+1)*block_size;
+}*/
+
+off_t get_offset(partition_t *p) {
+    double block_size = p->super_bloc.block_size;
+    double nb_data = p->super_bloc.nb_data;
+    double nb_inodes = p->super_bloc.nb_inodes;
+    return (off_t) (1 + ceil(nb_data / block_size) + ceil(nb_inodes / block_size) + ceil((nb_inodes * sizeof(inode_t)) / block_size)) * block_size;
 }
 
 int create_directory(partition_t *p){
@@ -111,12 +119,12 @@ int insertion_entry(partition_t *p, dir_entry_t dir){
     dir_entry_t tmp;
 
     for (int j = index_dir; j < p->super_bloc.nb_inodes - p->super_bloc.nb_inodes_free +1; j++) {
-        strcpy(tmp->name, (p->directory+j)->name);
-        tmp->inode = (p->directory+j)->inode;
+        strcpy(tmp.name, (p->directory+j)->name);
+        tmp.inode = (p->directory+j)->inode;
         strcpy((p->directory+j)->name, dir.name);
         (p->directory+j)->inode = dir.inode;
-        strcpy(dir.name, tmp->name);
-        dir.inode = tmp->inode;
+        strcpy(dir.name, tmp.name);
+        dir.inode = tmp.inode;
     }
 
     logger->trace("New directory entry added");
