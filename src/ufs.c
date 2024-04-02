@@ -107,16 +107,12 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
 
     partition_t p = {
             .fd = fd,
-            .super_bloc = super_bloc
+            .super_bloc = super_bloc,
+            .data_bitmap = (uint8_t*) malloc(super_bloc.nb_data * sizeof(uint8_t))
     };
 
     if (lseek(fd, 0, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
-        return -1;
-    }
-
-    if (update_bloc(p, &super_bloc, sizeof(super_bloc_t), 0, 0) == -1) {
-        logger->error("An error occurred when trying to write the superblock to the partition.");
         return -1;
     }
 
@@ -129,6 +125,19 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
         logger->error("An error occurred when trying to create the inode bitmap.");
         return -1;
     }
+
+    for (int i = 0; i < (int) ceil((double) (p.super_bloc.nb_inodes * sizeof(dir_entry_t)) / (double) p.super_bloc.block_size); ++i) {
+        if (create_data(p, i) == -1) {
+            logger->error("An error occurred when trying to create root dir data.");
+            return -1;
+        }
+    }
+
+    if (update_bloc(p, &super_bloc, sizeof(super_bloc_t), 0, 0) == -1) {
+        logger->error("An error occurred when trying to write the superblock to the partition.");
+        return -1;
+    }
+
     if (close(fd) == -1) {
         logger->error("An error occurred when trying to close the partition.");
         return -1;
@@ -197,7 +206,10 @@ int mount(char *path) {
     p->fd = fd;
     p->super_bloc = super_bloc;
     p->nb_opened_files = 0;
-    read_databitmap(*p);
+    p->data_bitmap = (uint8_t*) malloc(super_bloc.nb_data * sizeof(uint8_t));
+    p->inode_bitmap = (uint8_t*) malloc(super_bloc.nb_inodes * sizeof(uint8_t));
+    p->directory = (dir_entry_t*) malloc(super_bloc.nb_inodes * sizeof(dir_entry_t));
+    read_databitmap(p);
     read_inodebitmap(*p);
     read_directory(*p);
 
@@ -291,6 +303,17 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
     return i.memory_size_data - start_size;;
 }
 
+int my_read(file_t *f, void *buffer, int nb_bytes) {
+    inode_t i;
+    read_inode(*p_mounted, &i, f->inode);
+
+    int real_nbytes_to_read = nb_bytes > i.memory_size_data ? i.memory_size_data : nb_bytes;
+    int nb_data_blocks = (int) ceil((double) i.memory_size_data / (double) p_mounted->super_bloc.block_size);
+    for (int j = 0; j < nb_data_blocks; ++j) {
+        //read_data(*p_mounted, )
+    }
+}
+
 void my_seek(file_t *f, int offset, int base) {
     inode_t i;
     switch (base) {
@@ -306,4 +329,11 @@ void my_seek(file_t *f, int offset, int base) {
         default:
             logger->error("Base unrecognized.");
     }
+}
+
+size_t size(file_t *f) {
+    inode_t i;
+    read_inode(*p_mounted, &i, f->inode);
+
+    return i.memory_size_data;
 }
