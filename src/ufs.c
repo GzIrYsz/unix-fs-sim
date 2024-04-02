@@ -105,11 +105,10 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
     super_bloc.nb_data = nb_data_total - (uint32_t) ceil((double) nb_data_total / (double) super_bloc.block_size);
     super_bloc.nb_data_free = super_bloc.nb_data;
 
-    partition_t p = {
-            .fd = fd,
-            .super_bloc = super_bloc,
-            .data_bitmap = (uint8_t*) malloc(super_bloc.nb_data * sizeof(uint8_t))
-    };
+    partition_t *p = (partition_t*) malloc(sizeof(partition_t));
+
+    p->fd = fd;
+    p->super_bloc = super_bloc;
 
     if (lseek(fd, 0, SEEK_SET) == -1) {
         logger->error("An error occurred when trying to move the head.");
@@ -126,7 +125,7 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes) {
         return -1;
     }
 
-    for (int i = 0; i < (int) ceil((double) (p.super_bloc.nb_inodes * sizeof(dir_entry_t)) / (double) p.super_bloc.block_size); ++i) {
+    for (int i = 0; i < (int) ceil((double) (p->super_bloc.nb_inodes * sizeof(dir_entry_t)) / (double) p->super_bloc.block_size); ++i) {
         if (create_data(p, i) == -1) {
             logger->error("An error occurred when trying to create root dir data.");
             return -1;
@@ -210,8 +209,8 @@ int mount(char *path) {
     p->inode_bitmap = (uint8_t*) malloc(super_bloc.nb_inodes * sizeof(uint8_t));
     p->directory = (dir_entry_t*) malloc(super_bloc.nb_inodes * sizeof(dir_entry_t));
     read_databitmap(p);
-    read_inodebitmap(*p);
-    read_directory(*p);
+    read_inodebitmap(p);
+    read_directory(p);
 
     p_mounted = p;
     logger->info("Partition mounted.");
@@ -231,7 +230,7 @@ file_t* my_open(char *file_name) {
         f->inode = main_dir[i].inode;
     }
 
-    if ((f->inode = create_file(file_name, *p_mounted)) == -1) {
+    if ((f->inode = create_file(file_name, p_mounted)) == -1) {
         logger->error("An error occurred when trying to create the file.");
         return NULL;
     }
@@ -245,7 +244,7 @@ file_t* my_open(char *file_name) {
 
 int my_write(file_t *f, void *buffer, int nb_bytes) {
     inode_t i;
-    read_inode(*p_mounted, &i, f->inode);
+    read_inode(p_mounted, &i, f->inode);
     uint32_t start_size = i.memory_size_data;
     int write_pos = floor((double) f->offset / (double) p_mounted->super_bloc.block_size);
     if (write_pos >= NB_DATA_BLOCKS_INODE) {
@@ -254,15 +253,15 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
     }
 
     off_t write_offset = i.memory_size_data - (write_pos * p_mounted->super_bloc.block_size);
-    off_t block_offset = get_data_offset(*p_mounted, i.data_blocks[write_pos]);
+    off_t block_offset = get_data_offset(p_mounted, i.data_blocks[write_pos]);
 
-    if (update_bloc(*p_mounted, buffer, nb_bytes, block_offset, write_offset) == -1) {
+    if (update_bloc(p_mounted, buffer, nb_bytes, block_offset, write_offset) == -1) {
         logger->error("An error occurred when trying to write to the file.");
         return i.memory_size_data - start_size;
     }
     i.memory_size_data += p_mounted->super_bloc.block_size - write_offset;
     nb_bytes -= p_mounted->super_bloc.block_size - write_offset;
-    update_inode(*p_mounted, i, f->inode);
+    update_inode(p_mounted, i, f->inode);
 
     if (nb_bytes <= 0) {
         return i.memory_size_data - start_size;
@@ -271,32 +270,32 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
     size_t nb_blocks_to_write = floor((double) nb_bytes / (double) p_mounted->super_bloc.block_size);
     for (int j = 0; j < nb_blocks_to_write; ++j) {
         uint32_t new_data_block;
-        if ((new_data_block = next_free_data(*p_mounted)) == -1) {
+        if ((new_data_block = next_free_data(p_mounted)) == -1) {
             logger->error("An error occurred when trying to find a new free data block.");
             return i.memory_size_data - start_size;
         }
-        if (create_data(*p_mounted, new_data_block) == -1) {
+        if (create_data(p_mounted, new_data_block) == -1) {
             logger->error("An error occurred when trying to create data.");
         }
         i.data_blocks[write_pos + j] = new_data_block;
-        update_inode(*p_mounted, i, f->inode);
+        update_inode(p_mounted, i, f->inode);
 
         if (j < nb_blocks_to_write - 1) {
-            if (update_data(*p_mounted, (uint8_t*) buffer, new_data_block) == -1) {
+            if (update_data(p_mounted, (uint8_t*) buffer, new_data_block) == -1) {
                 logger->error("An error occurred when trying to write data in a new block.");
                 return i.memory_size_data - start_size;
             }
             i.memory_size_data += p_mounted->super_bloc.block_size;
             nb_bytes -= p_mounted->super_bloc.block_size;
-            update_inode(*p_mounted, i, f->inode);
+            update_inode(p_mounted, i, f->inode);
         } else {
-            if (update_bloc(*p_mounted, buffer, nb_bytes, new_data_block, 0) == -1) {
+            if (update_bloc(p_mounted, buffer, nb_bytes, new_data_block, 0) == -1) {
                 logger->error("An error occurred when trying to write data in a new block.");
                 return i.memory_size_data - start_size;
             }
             i.memory_size_data += p_mounted->super_bloc.block_size - nb_bytes;
             nb_bytes -= nb_bytes;
-            update_inode(*p_mounted, i, f->inode);
+            update_inode(p_mounted, i, f->inode);
         }
     }
     logger->info("Data written.");
@@ -305,7 +304,7 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
 
 int my_read(file_t *f, void *buffer, int nb_bytes) {
     inode_t i;
-    read_inode(*p_mounted, &i, f->inode);
+    read_inode(p_mounted, &i, f->inode);
 
     int real_nbytes_to_read = nb_bytes > i.memory_size_data ? i.memory_size_data : nb_bytes;
 
@@ -324,7 +323,7 @@ void my_seek(file_t *f, int offset, int base) {
             f->offset += offset;
             break;
         case SEEK_END:
-            read_inode(*p_mounted, &i, f->inode);
+            read_inode(p_mounted, &i, f->inode);
             f->offset = i.memory_size_data - offset;
         default:
             logger->error("Base unrecognized.");
@@ -333,7 +332,7 @@ void my_seek(file_t *f, int offset, int base) {
 
 size_t size(file_t *f) {
     inode_t i;
-    read_inode(*p_mounted, &i, f->inode);
+    read_inode(p_mounted, &i, f->inode);
 
     return i.memory_size_data;
 }
