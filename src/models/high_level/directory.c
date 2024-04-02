@@ -51,6 +51,8 @@ int read_directory(partition_t p){
         }
     }
 
+    p.directory = directory;
+
     logger->trace("Directory read");
     return 0;
 }
@@ -74,6 +76,7 @@ int update_directory(partition_t p){
         }
     }
 
+    p.directory = directory;
     logger->trace("Directory updated");
     return 0;
 }
