@@ -96,7 +96,7 @@ typedef struct {
  } super_bloc_t;
 
  typedef struct {
-     char *name;
+     char name[MAX_FILENAME];
      uint32_t inode;
  } dir_entry_t;
 
@@ -163,3 +163,5 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes);
  * @return 0 if everything went well, -1 otherwise.
  */
 int mount(char *path);
+
+size_t size(file_t *f);
