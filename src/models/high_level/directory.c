@@ -144,7 +144,7 @@ int delete_entry(partition_t p, dir_entry_t dir){
 
     for (int j = 0; j < p.super_bloc.nb_inodes-p.super_bloc.nb_inodes_free-1; j++) {
         p.directory[j].inode = p.directory[j+1].inode;
-        p.directory[j].name = p.directory[j+1].name;
+        strcpy(p.directory[j].name, p.directory[j+1].name);
     }
 
     logger->trace("Entry deleted");
