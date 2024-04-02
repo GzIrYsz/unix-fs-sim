@@ -308,9 +308,9 @@ int my_read(file_t *f, void *buffer, int nb_bytes) {
     read_inode(*p_mounted, &i, f->inode);
 
     int real_nbytes_to_read = nb_bytes > i.memory_size_data ? i.memory_size_data : nb_bytes;
-    int nb_data_blocks = (int) ceil((double) i.memory_size_data / (double) p_mounted->super_bloc.block_size);
-    for (int j = 0; j < nb_data_blocks; ++j) {
-        //read_data(*p_mounted, )
+
+    int nb_data_blocks = (int) ceil((double) real_nbytes_to_read / (double) p_mounted->super_bloc.block_size);
+    for (int j = 0; j < real_nbytes_to_read; j++) {
     }
 }
 
