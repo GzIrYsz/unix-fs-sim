@@ -226,9 +226,6 @@ file_t* my_open(char *file_name) {
     dir_entry_t *main_dir = p_mounted->directory;
 
     int i = 0;
-    char buf[100];
-    sprintf(buf, "strcmp : %d", strcmp(file_name, main_dir[i].name));
-    logger->debug(buf);
     while (!strcmp(file_name, main_dir[i].name) && i < (p_mounted->super_bloc.nb_inodes - p_mounted->super_bloc.nb_inodes_free)) {
         i++;
     }
@@ -310,10 +307,29 @@ int my_read(file_t *f, void *buffer, int nb_bytes) {
     inode_t i;
     read_inode(p_mounted, &i, f->inode);
 
-    int real_nbytes_to_read = nb_bytes > i.memory_size_data ? i.memory_size_data : nb_bytes;
+    int first_bloc = (int) floor((double) f->offset / (double) p_mounted->super_bloc.block_size);
+    int real_nbytes_to_read = nb_bytes > (i.memory_size_data - first_bloc * p_mounted->super_bloc.block_size)
+            ? i.memory_size_data - first_bloc * p_mounted->super_bloc.block_size
+            : nb_bytes;
+    int last_bloc = (int) floor((double) first_bloc + (double) (real_nbytes_to_read / p_mounted->super_bloc.block_size));
+    int nb_read = 0;
+    if (lseek(p_mounted->fd, get_data_offset(p_mounted, i.data_blocks[first_bloc]) + (f->offset - (first_bloc * p_mounted->super_bloc.block_size)), SEEK_SET) == -1) {
+        logger->error("An error occurred when trying to move the head.");
+        return -1;
+    }
+    for (int j = first_bloc; j < last_bloc; j++) {
+        if (lseek(p_mounted->fd, nb_read, SEEK_CUR)) {
+            logger->error("An error occurred when trying to move the head.");
+            return -1;
+        }
+        if (j == first_bloc) {
+            if (read(p_mounted->fd, buffer + nb_read, nb_bytes) == -1) {
+                logger->error("An error occurred when trying to read the file.");
+                return -1;
+            }
+        } else {
 
-    int nb_data_blocks = (int) ceil((double) real_nbytes_to_read / (double) p_mounted->super_bloc.block_size);
-    for (int j = 0; j < real_nbytes_to_read; j++) {
+        }
     }
 }
 
