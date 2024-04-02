@@ -265,14 +265,13 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
 
     if (update_bloc(p_mounted, buffer, nb_bytes, block_offset / p_mounted->super_bloc.block_size, f->offset) == -1) {
         logger->error("An error occurred when trying to write to the file.");
-        return i.memory_size_data - start_size;
+        return -1;
     }
-    i.memory_size_data += p_mounted->super_bloc.block_size - write_offset;
-    nb_bytes -= p_mounted->super_bloc.block_size - write_offset;
-    update_inode(p_mounted, i, f->inode);
 
     if (nb_bytes <= 0) {
-        return i.memory_size_data - start_size;
+        i.memory_size_data += nb_bytes;
+        update_inode(p_mounted, i, f->inode);
+        return nb_bytes;
     }
 
     size_t nb_blocks_to_write = floor((double) nb_bytes / (double) p_mounted->super_bloc.block_size);
@@ -280,7 +279,7 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
         uint32_t new_data_block;
         if ((new_data_block = next_free_data(p_mounted)) == -1) {
             logger->error("An error occurred when trying to find a new free data block.");
-            return i.memory_size_data - start_size;
+            return -1;
         }
         if (create_data(p_mounted, new_data_block) == -1) {
             logger->error("An error occurred when trying to create data.");
@@ -291,24 +290,20 @@ int my_write(file_t *f, void *buffer, int nb_bytes) {
         if (j < nb_blocks_to_write - 1) {
             if (update_data(p_mounted, (uint8_t*) buffer, new_data_block) == -1) {
                 logger->error("An error occurred when trying to write data in a new block.");
-                return i.memory_size_data - start_size;
+                return -1;
             }
-            i.memory_size_data += p_mounted->super_bloc.block_size;
-            nb_bytes -= p_mounted->super_bloc.block_size;
-            update_inode(p_mounted, i, f->inode);
         } else {
             if (update_bloc(p_mounted, buffer, nb_bytes, new_data_block, 0) == -1) {
                 logger->error("An error occurred when trying to write data in a new block.");
                 return i.memory_size_data - start_size;
             }
-            i.memory_size_data += p_mounted->super_bloc.block_size - nb_bytes;
-            nb_bytes -= nb_bytes;
-            update_inode(p_mounted, i, f->inode);
         }
     }
+    i.memory_size_data += nb_bytes;
+    update_inode(p_mounted, i, f->inode);
     logger->info("Data written.");
-    f->offset = i.memory_size_data - start_size;
-    return i.memory_size_data - start_size;;
+    f->offset += nb_bytes;
+    return nb_bytes;;
 }
 
 int my_read(file_t *f, void *buffer, int nb_bytes) {
