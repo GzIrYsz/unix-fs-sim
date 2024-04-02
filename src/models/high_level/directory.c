@@ -111,11 +111,11 @@ int insertion_entry(partition_t p, dir_entry_t dir){
     dir_entry_t tmp;
 
     for (int j = index_dir; j < p.super_bloc.nb_inodes - p.super_bloc.nb_inodes_free +1; j++) {
-        tmp.name = (p.directory+j)->name;
+        strcpy(tmp.name, (p.directory+j)->name);
         tmp.inode = (p.directory+j)->inode;
-        (p.directory+j)->name = dir.name;
+        strcpy((p.directory+j)->name, dir.name);
         (p.directory+j)->inode = dir.inode;
-        dir.name = tmp.name;
+        strcpy(dir.name, tmp.name);
         dir.inode = tmp.inode;
     }
 
