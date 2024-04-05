@@ -31,6 +31,7 @@ void read_file();
 void write_file();
 void change_offset();
 void close_file();
+void print_filesize();
 void unmount_partition();
 void print_usage();
 
@@ -80,6 +81,9 @@ int main(int argc, char **argv) {
             case '9':
                 unmount_partition();
                 break;
+            case 's':
+                print_filesize();
+                break;
             case 'u':
                 print_usage();
                 break;
@@ -102,6 +106,7 @@ void print_menu() {
     printf("7. Change offset\n");
     printf("8. Close file\n");
     printf("9. Unmount partition\n");
+    printf("s. File size\n");
     printf("u. Print usage\n");
     printf("q. Quit\n\n");
 }
@@ -205,6 +210,10 @@ void close_file() {
     printf("File closed.");
 }
 
+void print_filesize() {
+    printf("%s, %ld bytes\n", f->name, size(f));
+}
+
 void unmount_partition() {
     if (umount() == -1) {
         exit(ERR_UMOUNT);
@@ -213,5 +222,7 @@ void unmount_partition() {
 }
 
 void print_usage() {
-    fs_usage();
+    if (fs_usage() == -1) {
+        exit(ERR_USAGE);
+    }
 }

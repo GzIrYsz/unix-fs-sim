@@ -18,9 +18,3 @@
  * @return The inode if everything went well, -1 otherwise.
  */
 uint32_t create_file(char *name, partition_t *p);
-
-int read_file(char *name, partition_t *p); // ?
-
-int write_file(char *name, partition_t *p); // ?
-
-int delete_file(char *name, partition_t *p);

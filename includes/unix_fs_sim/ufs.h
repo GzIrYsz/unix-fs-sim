@@ -171,8 +171,21 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes);
  */
 int mount(char *path);
 
+/**
+ * @brief Unmount a partition.
+ * @return 0 if everything went well, -1 otherwise.
+ */
 int umount();
 
+/**
+ * @brief Returns the size of a file in bytes.
+ * @param f The file.
+ * @return The size of the given file.
+ */
 size_t size(file_t *f);
 
-void fs_usage();
+/**
+ * @brief Prints the usage of the filesystem (ratio of inode and data blocks used).
+ * @return 0 if everything went well, -1 otherwise.
+ */
+int fs_usage();

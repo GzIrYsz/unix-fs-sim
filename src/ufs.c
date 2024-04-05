@@ -412,7 +412,12 @@ int my_close(file_t *f) {
     return 0;
 }
 
-void fs_usage() {
+int fs_usage() {
+    if (p_mounted == NULL) {
+        logger->error("No partition mounted.");
+        return -1;
+    }
+
     printf("%.2f%% of inodes are free (%d / %d).\n",
            ((double) p_mounted->super_bloc.nb_inodes_free / (double) p_mounted->super_bloc.nb_inodes) * 100,
            p_mounted->super_bloc.nb_inodes_free,
@@ -421,4 +426,5 @@ void fs_usage() {
            ((double) p_mounted->super_bloc.nb_data_free / (double) p_mounted->super_bloc.nb_data) * 100,
            p_mounted->super_bloc.nb_data_free,
            p_mounted->super_bloc.nb_data);
+    return 0;
 }

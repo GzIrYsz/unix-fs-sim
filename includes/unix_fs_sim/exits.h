@@ -61,6 +61,11 @@
 #define ERR_CLOSE 17
 
 /**
- * @def ERR_MKFS The exit code when an error occurred when trying to unmount a partition.
+ * @def ERR_UMOUNT The exit code when an error occurred when trying to unmount a partition.
  */
 #define ERR_UMOUNT 18
+
+/**
+ * @def ERR_USAGE The exit code when an error occurred when trying to view the usage of a fs.
+ */
+#define ERR_USAGE 19
