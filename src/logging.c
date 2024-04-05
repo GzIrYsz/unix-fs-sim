@@ -13,7 +13,7 @@
 #include "logging/logging.h"
 
 #include "ansiColors.h"
-#include "exits.h"
+#include "unix_fs_sim/exits.h"
 #include "logging.priv.h"
 
 extern logger_t *logger;

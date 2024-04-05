@@ -115,6 +115,13 @@ int my_format(char *partition_name);
 file_t* my_open(char *file_name);
 
 /**
+ * @brief Closes a file
+ * @param t The file to close.
+ * @return 0 if everything went well, -1 otherwise.
+ */
+int my_close(file_t *f);
+
+/**
  * @brief Writes the content in the buffer into the named file.
  * @param f The file where to store the data.
  * @param buffer The buffer to store in the file.
@@ -164,4 +171,8 @@ int mkfs(char *path, block_size_t block_size, uint8_t nb_inodes);
  */
 int mount(char *path);
 
+int umount();
+
 size_t size(file_t *f);
+
+void fs_usage();

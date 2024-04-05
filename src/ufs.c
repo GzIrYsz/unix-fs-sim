@@ -233,15 +233,17 @@ file_t* my_open(char *file_name) {
     file_t *f = (file_t*) malloc(sizeof(file_t));
     if (i < (p_mounted->super_bloc.nb_inodes - p_mounted->super_bloc.nb_inodes_free)) {
         f->inode = main_dir[i].inode;
-    }
-
-    if ((f->inode = create_file(file_name, p_mounted)) == -1) {
-        logger->error("An error occurred when trying to create the file.");
-        return NULL;
+    } else {
+        if ((f->inode = create_file(file_name, p_mounted)) == -1) {
+            logger->error("An error occurred when trying to create the file.");
+            return NULL;
+        }
     }
 
     strcpy(f->name, file_name);
     f->offset = 0;
+    update_databitmap(p_mounted);
+    update_inodebitmap(p_mounted);
     p_mounted->opened_files[p_mounted->nb_opened_files++] = f;
     logger->info("File opened.");
     return f;
@@ -317,19 +319,19 @@ int my_read(file_t *f, void *buffer, int nb_bytes) {
         logger->error("An error occurred when trying to move the head.");
         return -1;
     }
-    for (int j = first_bloc; j < last_bloc; j++) {
-        if (lseek(p_mounted->fd, nb_read, SEEK_CUR)) {
+    for (int j = first_bloc; j <= last_bloc; j++) {
+        if (lseek(p_mounted->fd, nb_read, SEEK_CUR) == -1) {
             logger->error("An error occurred when trying to move the head.");
             return -1;
         }
-        if (j == first_bloc) {
-            if (read(p_mounted->fd, buffer + nb_read, nb_bytes) == -1) {
-                logger->error("An error occurred when trying to read the file.");
-                return -1;
-            }
-        } else {
-
+        int b_to_read = ((real_nbytes_to_read - nb_read) / p_mounted->super_bloc.block_size) >= 1
+                ? p_mounted->super_bloc.block_size
+                : real_nbytes_to_read - nb_read;
+        if (read(p_mounted->fd, buffer + nb_read, b_to_read) == -1) {
+            logger->error("An error occurred when trying to read the file.");
+            return -1;
         }
+        nb_read += b_to_read;
     }
 }
 
@@ -355,4 +357,68 @@ size_t size(file_t *f) {
     read_inode(p_mounted, &i, f->inode);
 
     return i.memory_size_data;
+}
+
+int umount() {
+    if (p_mounted == NULL) {
+        logger->error("There is no partition mounted.");
+        return -1;
+    }
+
+    if (close(p_mounted->fd) == -1) {
+        logger->error("An error occurred when trying to close the partition.");
+        return -1;
+    }
+
+    free(p_mounted->data_bitmap);
+    free(p_mounted->inode_bitmap);
+    free(p_mounted->directory);
+    free(p_mounted);
+    p_mounted = NULL;
+
+    logger->info("Partition unmounted.");
+    return 0;
+}
+
+int my_close(file_t *f) {
+    if (f == NULL) {
+        logger->error("You are trying to close a file that does not exists.");
+        return -1;
+    }
+
+    if (p_mounted->nb_opened_files <= 0) {
+        logger->error("There is no file opened.");
+        return -1;
+    }
+
+    int i = 0;
+    while (i < p_mounted->nb_opened_files && p_mounted->opened_files[i] != f) {
+        i++;
+    }
+
+    if (i >= p_mounted->nb_opened_files) {
+        logger->error("This file is not opened.");
+        return -1;
+    }
+
+    p_mounted->opened_files[i] = NULL;
+    free(f);
+    f = NULL;
+
+    update_databitmap(p_mounted);
+    update_inodebitmap(p_mounted);
+
+    logger->info("File closed.");
+    return 0;
+}
+
+void fs_usage() {
+    printf("%.2f%% of inodes are free (%d / %d).\n",
+           ((double) p_mounted->super_bloc.nb_inodes_free / (double) p_mounted->super_bloc.nb_inodes) * 100,
+           p_mounted->super_bloc.nb_inodes_free,
+           p_mounted->super_bloc.nb_inodes);
+    printf("%.2f%% of data blocks are free (%d / %d).\n",
+           ((double) p_mounted->super_bloc.nb_data_free / (double) p_mounted->super_bloc.nb_data) * 100,
+           p_mounted->super_bloc.nb_data_free,
+           p_mounted->super_bloc.nb_data);
 }
